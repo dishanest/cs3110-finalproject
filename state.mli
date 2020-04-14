@@ -33,12 +33,19 @@ val get_cell_value: cell -> int
 (** [check_win t] is the color of the player that won the game. *)
 val check_win: t -> color option
 
-(** [insert x y value b] inserts a chip into the specified cell with the correct
-    value. *)
-val insert: int -> int -> int -> board -> board
+(** [insert col v t] inserts a chip with vallue [v] in column [col] of the board
+    in [t] where color is of the player whose turn it is in [t]
+    Raises: "Invalid col" failure if [col] is less than 1 and "Invalid col" 
+    failure if the column is already full*)
+val insert: int -> int -> board -> board
 
 (** [tick_turn t] advances to the next color's turn by switching colors.  *)
 val tick_turn: t -> t
+
+(** [new_state c row col] creates a new state with an empty board of size 
+    [row] by [col] where the starting player is of color [c]
+    Requires: [row] and [col] are larger than 0*)
+val new_state: color -> int -> int -> t
 
 (** [score t] is the score of the game in its current state. *)
 val score: t -> int

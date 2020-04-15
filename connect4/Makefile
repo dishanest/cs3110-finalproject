@@ -1,4 +1,4 @@
-MODULES=state main test author
+MODULES=state main test author command
 OBJECTS=$(MODULES:=.cmo)
 MLS=$(MODULES:=.ml)
 MLIS=$(MODULES:=.mli)
@@ -11,7 +11,7 @@ default: build
 
 build:
 	# $(OCAMLBUILD) $(OBJECTS)
-	ocamlbuild -use-ocamlfind state.cmo main.cmo test.cmo
+	ocamlbuild -use-ocamlfind state.cmo main.cmo test.cmo command.cmo
 
 test:
 	$(OCAMLBUILD) -tag 'debug' $(TEST) && ./$(TEST)

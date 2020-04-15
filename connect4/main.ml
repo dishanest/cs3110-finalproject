@@ -21,3 +21,16 @@ let main () =
   | h::t -> play_game h t
 
 let () = main ()
+
+
+(** Stuff main needs to do:
+    - instructions to start game (list valid commands)
+    - print score
+    - tick_turn
+    - update the state
+    - insert piece (account for failure)
+    - check win at every turn
+    - print new board after every turn
+    - win prompt/game over/bye bye
+    - quit/exit command
+*)

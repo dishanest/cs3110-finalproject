@@ -28,7 +28,6 @@ let get_cell_color c =
 let get_cell_value c = 
   c.value
 
-
 (**[list_assoc color lst row col] is an association list from an int r to an int 
    c where c is [col] and r is the row of all cells of color [color] in [t]
    Requires: row begins at 0*)
@@ -101,7 +100,6 @@ let rec new_column len =
 let rec new_board row col = 
   if row = 0 then []  else (new_column col)::(new_board (row-1) col)
 
-
 let new_state c row col= 
   {player = c; score = 0; board = (new_board row col); row = row; col = col}
 
@@ -126,8 +124,7 @@ let rec insert col v t =
     |a::b -> if col = 0 then (push t.player v a)::b else 
         a::add (col-1) b
     | [] -> failwith "invalid col" in 
-
-  add col board
+  { t with board = add col board }
 
 let tick_turn t = 
   if t.player = Red then 

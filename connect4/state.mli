@@ -23,21 +23,20 @@ type t
     command line *)
 val print: board -> unit
 
-(** [get_cell_color c] is Some of the color of the chip in cell [c], and None 
-    if the cell is empty. *)
-val get_cell_color: cell -> color option
+(** [get_cell_color c] is the color of the chip in cell [c]. *)
+val get_cell_color: cell -> color
 
 (** [get_cell_value c] is the integer point-value of cell [c]. *)
 val get_cell_value: cell -> int
 
-(** [check_win t] is the color of the player that won the game. *)
-val check_win: t -> color option
+(** [check_win t] is true if someone has won the game. *)
+val check_win: t -> bool
 
-(** [insert col v t] inserts a chip with vallue [v] in column [col] of the board
-    in [t] where color is of the player whose turn it is in [t]
+(** [insert col v t] inserts a chip with value [v] in column [col] of the board
+    in state [t] where color is of the player whose turn it is in [t]
     Raises: "Invalid col" failure if [col] is less than 1 and "Invalid col" 
     failure if the column is already full*)
-val insert: int -> int -> board -> board
+val insert: int -> int -> t -> t
 
 (** [tick_turn t] advances to the next color's turn by switching colors.  *)
 val tick_turn: t -> t

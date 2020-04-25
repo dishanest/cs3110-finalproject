@@ -24,17 +24,16 @@ type board
 (** Abstract data type of values representing states. *)
 type t
 
+exception Error
 (** [get_cell_color c] is the color of the chip in cell [c]. *)
 val get_cell_color: cell -> color
 
 (** [get_cell_value c] is the integer point-value of cell [c]. *)
 val get_cell_value: cell -> int
 
-(** [check_win t n] is true if someone has won the game where the condition is 
-    to have int [n] pices of their color in a row where their color is the 
-    player  color in [t] and the board checked is that of [t].
-    Requires: [n] is larger than 2 (for a real game) *)
-val check_win: t -> int -> bool
+val get_state_color: t -> string
+(** [check_win t] is true if someone has won the game. *)
+val check_win: t -> bool
 
 (** [insert col v t] inserts a chip with value [v] in column [col] of the board
     in state [t] where color is of the player whose turn it is in [t]
@@ -45,6 +44,8 @@ val insert: int -> int -> t -> t
 
 (** [tick_turn t] advances to the next color's turn by switching colors.  *)
 val tick_turn: t -> t
+
+val new_board: int -> int -> 'a option List.t List.t
 
 (** [new_state c row col] creates a new state with an empty board of size 
     [row] by [col] where the starting player is of color [c]

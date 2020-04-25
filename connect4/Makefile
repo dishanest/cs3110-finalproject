@@ -10,8 +10,8 @@ default: build
 	utop
 
 build:
-	# $(OCAMLBUILD) $(OBJECTS)
-	ocamlbuild -use-ocamlfind state.cmo main.cmo test.cmo command.cmo
+	$(OCAMLBUILD) $(OBJECTS)
+	# ocamlbuild -use-ocamlfind state.cmo main.cmo test.cmo command.cmo main.cmo
 
 test:
 	$(OCAMLBUILD) -tag 'debug' $(TEST) && ./$(TEST)

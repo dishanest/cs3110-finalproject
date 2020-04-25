@@ -24,12 +24,14 @@ type board
 (** Abstract data type of values representing states. *)
 type t
 
+exception Error
 (** [get_cell_color c] is the color of the chip in cell [c]. *)
 val get_cell_color: cell -> color
 
 (** [get_cell_value c] is the integer point-value of cell [c]. *)
 val get_cell_value: cell -> int
 
+val get_state_color: t -> string
 (** [check_win t] is true if someone has won the game. *)
 val check_win: t -> bool
 
@@ -42,6 +44,8 @@ val insert: int -> int -> t -> t
 
 (** [tick_turn t] advances to the next color's turn by switching colors.  *)
 val tick_turn: t -> t
+
+val new_board: int -> int -> 'a option List.t List.t
 
 (** [new_state c row col] creates a new state with an empty board of size 
     [row] by [col] where the starting player is of color [c]

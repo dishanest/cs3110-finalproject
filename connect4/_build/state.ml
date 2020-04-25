@@ -10,6 +10,8 @@ type cell = {
 
 type board = cell option list list
 
+exception Error
+
 type t = {
   board: board;
   player: color;
@@ -23,6 +25,10 @@ let get_cell_color c =
 
 let get_cell_value c = 
   c.value
+
+let get_state_color st = 
+  if st.player = Red then "RED"
+  else "BLUE"
 
 (**[list_assoc color lst row col] is an association list from an int r to an int 
    c where c is [col] and r is the row of all cells of color [color] in [t]

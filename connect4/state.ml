@@ -10,6 +10,8 @@ type cell = {
 
 type board = cell option list list
 
+exception Error
+
 type t = {
   board: board;
   player: color;
@@ -23,6 +25,10 @@ let get_cell_color c =
 
 let get_cell_value c = 
   c.value
+
+let get_state_color st = 
+  if st.player = Red then "RED"
+  else "BLUE"
 
 (**[list_assoc color lst row col] is an association list from an int r to an int 
    c where c is [col] and r is the row of all cells of color [color] in [t]
@@ -43,48 +49,24 @@ let rec make_assoc color board col=
   | [] -> []
   | x :: y -> (list_assoc color x 0 col) @ (make_assoc color y (col+1))
 
-(** [check_pattern piece assoc n pattern] is the bool of whether there is a 
-    group of int [n] pieces of the same color in a pattern [pattern] in 
-    the list [assoc] where one of the pieces in the group is [piece]
-    Requires: n is *)
-let rec check_pattern piece assoc n pattern = 
-  match pattern with
-  | (1,0) when n>0 ->  mem (fst piece +(n-1), snd piece) assoc && 
-                       check_pattern piece assoc (n-1) pattern
-  | (0,1) when n>0 ->  mem (fst piece , snd piece +(n-1)) assoc && 
-                       check_pattern piece assoc (n-1) pattern
-  | (1,1) when n>0 ->  mem (fst piece +(n-1), snd piece +(n-1)) assoc && 
-                       check_pattern piece assoc (n-1) pattern  
-  | (1,-1) when n>0 ->  mem (fst piece +(n-1), snd piece -(n-1)) assoc && 
-                        check_pattern piece assoc (n-1) pattern   
-  | (-1,1) when n>0 ->  mem (fst piece -(n-1), snd piece +(n-1)) assoc && 
-                        check_pattern piece assoc (n-1) pattern  
-  | (-1,-1) when n>0 ->  mem (fst piece -(n-1), snd piece -(n-1)) assoc && 
-                         check_pattern piece assoc (n-1) pattern                                        
-  |_ -> true
+(** [check_horizontal piece assoc] is the bool of whether there is a horizontal 
+    of 4 pieces in assoc that contains [piece]*)
+let rec check_horizontal piece assoc = 
+  if mem (fst piece +1, snd piece) assoc && 
+     mem (fst piece +2, snd piece) assoc && 
+     mem (fst piece +3, snd piece) assoc then true else false
 
-(** [check_horizontal piece assoc n] is the bool of whether there is a horizontal 
-    of int [n] pieces in assoc that contains [piece]*)
-let check_horizontal piece assoc n = 
-  (* if mem (fst piece +1, snd piece) assoc && 
-      mem (fst piece +2, snd piece) assoc && 
-      mem (fst piece +3, snd piece) assoc then true else false
-  *)
-  check_pattern piece assoc n (1,0)
+(** [check_vertial piece assoc] is the bool of whether there is a vertical 
+    of 4 pieces in assoc that contains [piece]*)
+let rec check_vertical piece assoc = 
+  if mem (fst piece , snd piece +1) assoc && 
+     mem (fst piece , snd piece +2) assoc && 
+     mem (fst piece , snd piece +3) assoc then true else false
 
-(** [check_vertial piece assoc n] is the bool of whether there is a vertical 
-    of int [n] pieces in assoc that contains [piece]*)
-let check_vertical piece assoc n = 
-  (* if mem (fst piece , snd piece +1) assoc && 
-      mem (fst piece , snd piece +2) assoc && 
-      mem (fst piece , snd piece +3) assoc then true else false
-  *)
-  check_pattern piece assoc n (0,1)
-
-(** [check_diagonal piece assoc n] is the bool of whether there is a diagonal 
-    of int [n] pieces in assoc that contains [piece]*)
-let check_diagonal piece assoc n = 
-  (*if (mem (fst piece +1, snd piece +1) assoc && 
+(** [check_diagonal piece assoc] is the bool of whether there is a diagonal 
+    of 4 pieces in assoc that contains [piece]*)
+let rec check_diagonal piece assoc = 
+  if (mem (fst piece +1, snd piece +1) assoc && 
       mem (fst piece +2, snd piece +2) assoc && 
       mem (fst piece +3, snd piece +3) assoc)|| 
      (mem (fst piece +1, snd piece -1) assoc && 
@@ -96,21 +78,16 @@ let check_diagonal piece assoc n =
      (mem (fst piece -1, snd piece -1) assoc && 
       mem (fst piece -2, snd piece -2) assoc && 
       mem (fst piece -3, snd piece -3) assoc )
-    then true else false
-  *)
-  check_pattern piece assoc n (1,1) ||
-  check_pattern piece assoc n (1,-1) ||
-  check_pattern piece assoc n (-1,1) ||
-  check_pattern piece assoc n (-1,-1)
+  then true else false
 
-let rec check_win t n = 
+let rec check_win t = 
   let board = t.board in 
   let color = t.player in 
   let assoc = make_assoc color board 0 in 
   let rec check ass = 
     match ass with 
-    |a::b -> if check_diagonal a assoc n|| check_vertical a assoc n
-                || check_horizontal a assoc n then true else check b
+    |a::b -> if check_diagonal a assoc || check_vertical a assoc 
+                || check_horizontal a assoc then true else check b
     |[] -> false
   in check assoc
 

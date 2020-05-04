@@ -15,6 +15,9 @@
 (** The colors of the chips and players. *)
 type color = Red | Blue
 
+(** The color of the winning player or none if no player wins*)
+type win = RWin | BWin | NWin
+
 (** A cell within the board with color and coordinate information. *)
 type cell
 
@@ -33,11 +36,17 @@ val get_cell_value: cell -> int
 
 val get_state_color: t -> string
 
-(** [check_win t n] is true if someone has won the game where the condition is 
+(** [check_win' t n] is true if someone has won the game where the condition is 
     to have int [n] pices of their color in a row where their color is the 
     player  color in [t] and the board checked is that of [t].
     Requires: [n] is larger than 2 (for a real game) *)
-val check_win: t -> int -> bool
+val check_win': t -> int -> bool
+
+(** [check_win t n] is [BWin]\[RWin] if blue\red has won the game where the 
+    condition is to have int [n] pices of their color in a row where the board 
+    checked is that of [t] or [NWin] if neither player wins.
+    Requires: [n] is larger than 2 (for a real game) *)
+val check_win: t -> int -> win
 
 (** [insert col v t] inserts a chip with value [v] in column [col] of the board
     in state [t] where color is of the player whose turn it is in [t]
@@ -46,8 +55,17 @@ val check_win: t -> int -> bool
     failure if the column is already full*)
 val insert: int -> int -> t -> t
 
+(** [gravity t] Is the state which contains all of the pieces in [t] but whose
+    placements are corrected as they would be by gravity (shifted down) *)
+val gravity: t -> t
+
 (** [tick_turn t] advances to the next color's turn by switching colors.  *)
 val tick_turn: t -> t
+
+(** [undo t] returns the last state before an alteration such as an insertion 
+    or a rotation
+    Raises: "Could not undo further" failure if undo is called on a new state*)
+val undo: t-> t
 
 val new_board: int -> int -> 'a option List.t List.t
 

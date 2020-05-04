@@ -5,8 +5,10 @@ type object_phrase = string list
 type command = 
   | Insert of object_phrase
   | Rotate of object_phrase
-  | Score 
+  | Score
+  | Undo 
   | Quit
+
 
 (** Raised when an empty command is parsed. *)
 exception Empty

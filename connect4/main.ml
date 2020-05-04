@@ -16,7 +16,7 @@ let get_next_el (lst: string list) : string =
 
 let rec play st =
   print st;
-  ANSITerminal.(print_string[white] "\n enter command (Insert col val, Rotate 1-4, Score, Quit)\n");
+  ANSITerminal.(print_string[white] "\n enter command (insert col val, rotate 1-4, score, undo,  quit)\n");
   try let cmd = Command.parse (read_line()) in
     match cmd with
     | Insert cmd_lst -> 
@@ -26,9 +26,22 @@ let rec play st =
         | h::t -> let y = get_next_el t in
           let new_st = try insert (int_of_string h) (int_of_string y) st with
             | Error -> ANSITerminal.(print_string[red] "Error inserting\n"); play st in 
-          if State.check_win new_st 4 then 
+          if State.check_win new_st 4 = RWin then 
             begin 
-              print_string ("player " ^ get_state_color new_st ^ " wins!"); 
+              print new_st;
+              print_string ("player "); 
+              ANSITerminal.(print_string[red] "RED");
+              print_string (" wins!");
+              print_newline ();
+              exit 0
+            end
+          else if State.check_win new_st 4 = BWin then 
+            begin 
+              print new_st;
+              print_string ("player "); 
+              ANSITerminal.(print_string[blue] "BLUE");
+              print_string (" wins!");
+              print_newline ();
               exit 0
             end
           else
@@ -36,6 +49,7 @@ let rec play st =
             |> tick_turn 
             |> play
       end
+    | Undo -> let st = undo st in play st
     | Rotate cmd_lst -> 
       begin
         match cmd_lst with
@@ -43,10 +57,23 @@ let rec play st =
         | h::t ->  
           let new_st = 
             st 
-            |> rotate (int_of_string h) in 
-          if State.check_win new_st 4 then 
+            |> rotate (int_of_string h) |> gravity in 
+          if State.check_win new_st 4 = RWin then 
             begin 
-              print_string ("player " ^ get_state_color new_st ^ " wins!"); 
+              print new_st;
+              print_string ("player "); 
+              ANSITerminal.(print_string[red] "RED");
+              print_string (" wins!");
+              print_newline ();
+              exit 0
+            end
+          else if State.check_win new_st 4 = BWin then 
+            begin 
+              print new_st;
+              print_string ("player "); 
+              ANSITerminal.(print_string[blue] "BLUE");
+              print_string (" wins!");
+              print_newline ();
               exit 0
             end
           else

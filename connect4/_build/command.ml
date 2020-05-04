@@ -6,6 +6,7 @@ type command =
   | Insert of object_phrase
   | Rotate of object_phrase
   | Score 
+  | Undo
   | Quit
 
 exception Empty
@@ -25,6 +26,7 @@ let parse str =
   | [] -> raise Empty
   | h::t -> if h="quit" then Quit
     else if h="insert" then Insert t
+    else if h="undo" then Undo
     else if h="rotate" then Rotate t
     else if h="score" then Score
     else raise Malformed

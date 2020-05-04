@@ -11,7 +11,7 @@ let three_red_row  =
   (new_state Red 6 7) |> insert 0 0 |> insert 1 0 |> insert 2 0
 
 let mk_chkwin_tst name expected state = 
-  name >:: (fun _ -> assert_equal (check_win state) expected ~printer:string_of_bool)
+  name >:: (fun _ -> assert_equal (check_win state 4) expected ~printer:string_of_bool)
 
 let check_win_tests = [
   mk_chkwin_tst "3 red in col" false three_red_col;

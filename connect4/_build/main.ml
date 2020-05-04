@@ -26,7 +26,7 @@ let rec play st =
         | h::t -> let y = get_next_el t in
           let new_st = try insert (int_of_string h) (int_of_string y) st with
             | Error -> ANSITerminal.(print_string[red] "Error inserting\n"); play st in 
-          if State.check_win new_st then 
+          if State.check_win new_st 4 then 
             begin 
               print_string ("player " ^ get_state_color new_st ^ " wins!"); 
               exit 0
@@ -44,7 +44,7 @@ let rec play st =
           let new_st = 
             st 
             |> rotate (int_of_string h) in 
-          if State.check_win new_st then 
+          if State.check_win new_st 4 then 
             begin 
               print_string ("player " ^ get_state_color new_st ^ " wins!"); 
               exit 0

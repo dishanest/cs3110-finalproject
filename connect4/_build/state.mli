@@ -32,8 +32,12 @@ val get_cell_color: cell -> color
 val get_cell_value: cell -> int
 
 val get_state_color: t -> string
-(** [check_win t] is true if someone has won the game. *)
-val check_win: t -> bool
+
+(** [check_win t n] is true if someone has won the game where the condition is 
+    to have int [n] pices of their color in a row where their color is the 
+    player  color in [t] and the board checked is that of [t].
+    Requires: [n] is larger than 2 (for a real game) *)
+val check_win: t -> int -> bool
 
 (** [insert col v t] inserts a chip with value [v] in column [col] of the board
     in state [t] where color is of the player whose turn it is in [t]

@@ -6,20 +6,35 @@ open State
 
 
 let three_red_col = 
-  (new_state Red 6 7) |> insert 0 0 |> insert 0 0 |> insert 0 0
-let three_red_row  = 
-  (new_state Red 6 7) |> insert 0 0 |> insert 1 0 |> insert 2 0
+  (new_state (Red, Blue) 6 7) |> insert 0 0 |> insert 0 0 |> insert 0 0
+let three_red_row = 
+  (new_state (Red, Blue) 6 7) |> insert 0 0 |> insert 1 0 |> insert 2 0
+let diag = 
+  (new_state (Red, Blue)  6 7) |> insert 0 0 |> tick_turn |> insert 1 0 |> tick_turn |> insert 1 0 |> tick_turn 
+  |> insert 2 0 |> tick_turn |> insert 2 0 |> tick_turn |> insert 3 0 |> tick_turn |> insert 2 0 |> tick_turn |> insert 3 0 |> tick_turn 
+  |> insert 3 0 |> tick_turn |> insert 0 0 |> tick_turn |> insert 3 0
+
+let _ = State.print diag
 
 let mk_chkwin_tst name expected state = 
-  name >:: (fun _ -> assert_equal (check_win' state 4) expected ~printer:string_of_bool)
+  name >:: begin
+    fun _ -> assert_equal (check_win state 4) expected 
+        ~printer: begin 
+          fun w -> 
+            match w with 
+            | NWin -> "nwin" 
+            | Win color -> string_of_color color 
+        end
+  end
 
 let check_win_tests = [
-  mk_chkwin_tst "3 red in col" false three_red_col;
-  mk_chkwin_tst "4 red in col" true (three_red_col |> insert 0 0);
-  mk_chkwin_tst "5 red in col" true (three_red_col |> insert 0 0 |> insert 0 0);
-  mk_chkwin_tst "3 red in row" false three_red_row;
-  mk_chkwin_tst "4 red in row" true (three_red_row |> insert 3 0);
-  mk_chkwin_tst "5 red in row" true (three_red_row |> insert 3 0);
+  mk_chkwin_tst "3 red in col" NWin three_red_col;
+  mk_chkwin_tst "4 red in col" (Win Red) (three_red_col |> insert 0 0);
+  mk_chkwin_tst "5 red in col" (Win Red) (three_red_col |> insert 0 0 |> insert 0 0);
+  mk_chkwin_tst "3 red in row" NWin three_red_row;
+  mk_chkwin_tst "4 red in row" (Win Red) (three_red_row |> insert 3 0);
+  mk_chkwin_tst "5 red in row" (Win Red) (three_red_row |> insert 3 0);
+  mk_chkwin_tst "4 red diag" (Win Red) (diag)
 ]
 
 let tests =

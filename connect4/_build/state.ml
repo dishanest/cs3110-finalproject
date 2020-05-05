@@ -1,37 +1,59 @@
-
 open List
 
-type color = Red | Blue
+let invalid_col_err = Failure "Invalid column. "
+let full_col_err = Failure "Column is full. "
 
-type win = RWin | BWin | NWin
+type color = 
+  | Red
+  | Green
+  | Yellow
+  | Blue
+  | Magenta
+  | Cyan
+
+type win = 
+  | NWin
+  | Win of color
 
 type cell = {
-  color:color;
-  value:int;
+  color: color;
+  value: int;
 }
 
 type board = cell option list list
 
-exception Error
-
 type t = {
+  (*  num_cols & num_rows are static - represent dimensions of the board *)
+  num_rows: int;
+  num_cols: int;
+  (* player_colors is static - colors that the players chose at the beginning *)
+  player_colors: color * color;
   board: board;
-  player: color;
+  (* color of the player whose turn it currently is. *)
+  current_player: color;
   score: int;
-  col: int;
-  row: int;
-  prev: t option;
+  prev_state: t option;
 } 
 
-let get_cell_color c = 
-  c.color
+let get_cell_color c = c.color
+let get_cell_value c = c.value
 
-let get_cell_value c = 
-  c.value
+let get_p1_color st = 
+  let (c1, _) = st.player_colors in c1
 
-let get_state_color st = 
-  if st.player = Red then "RED"
-  else "BLUE"
+let get_p2_color st = 
+  let (_, c2) = st.player_colors in c2
+
+let get_current_color st = st.current_player
+
+let string_of_color c = 
+  match c with
+  | Red -> "Red"
+  | Green -> "Green"
+  | Yellow -> "Yellow"
+  | Blue -> "Blue"
+  | Magenta -> "Magenta"
+  | Cyan -> "Cyan"
 
 (**[list_assoc color lst row col] is an association list from an int r to an int 
    c where c is [col] and r is the row of all cells of color [color] in [t]
@@ -109,40 +131,26 @@ let check_diagonal piece assoc n =
   check_pattern piece assoc n (-1,-1)
 
 (** [win_color color] returns the type of win that matches to color [color]*)
-let win_color color =
-  match color with
-  |Red -> RWin
-  |Blue -> BWin
+let win_color color = Win color
 
 let rec check_win t n = 
   let board = t.board in 
-  let color = t.player in 
-  let color' = if color = Red then Blue else Red in
+  let (color, color') = t.player_colors in
   let assoc = make_assoc color board 0 in 
   let assoc' = make_assoc color' board 0 in
   let rec check ass = 
     match ass with 
-    |a::b -> if check_diagonal a ass n|| check_vertical a ass n
-                || check_horizontal a ass n then true else check b
-    |[] -> false
-  in if (check assoc) then 
+    | a::b -> 
+      if check_diagonal a ass n
+      || check_vertical a ass n
+      || check_horizontal a ass n 
+      then true else check b
+    | [] -> false in
+  if (check assoc) then 
     win_color color
   else if (check assoc') then 
     win_color color'
   else NWin
-
-let rec check_win' t n = 
-  let board = t.board in 
-  let color = t.player in 
-  let color' = if color = Red then Blue else Red in
-  let assoc = make_assoc color board 0 in 
-  let assoc' = make_assoc color' board 0 in
-  let rec check ass = 
-    match ass with 
-    |a::b -> if check_diagonal a assoc n|| check_vertical a assoc n
-                || check_horizontal a assoc n then true else check b
-    |[] -> false
-  in check assoc || check assoc'
 
 (** [new_column len] is a string of empty cells of length [len]
     Requires: [len is larger than 0]*)
@@ -152,10 +160,17 @@ let rec new_column len =
 (** [new_board col row] creates a new board of size int [row] by int [col]
     Requires: [col] and [row] larger than 0*)
 let rec new_board row col = 
-  if row = 0 then []  else (new_column col)::(new_board (row-1) col)
+  if row = 0 then [] else (new_column col)::(new_board (row-1) col)
 
-let new_state c row col = 
-  {player = c; score = 0; board = (new_board col row); row = row; col = col; prev = None}
+let new_state (c1, c2) row col = {
+  num_rows = row; 
+  num_cols = col;
+  player_colors = (c1, c2);
+  board = (new_board col row); 
+  current_player = c1; 
+  score = 0; 
+  prev_state = None
+}
 
 (** [push color v lst] is the list [lst] with a cell of color [color] and
     value [v]
@@ -163,21 +178,23 @@ let new_state c row col =
 let rec push color v lst = 
   let cell = { color = color ; value = v} in
   match lst with
-  |None::(Some a)::x -> 
-    (Some cell)::(Some a)::x
-  |None::[] -> (Some cell)::[]
-  |Some _::_ -> failwith "invalid col"
-  |None::x -> None :: push color v x
-  |[] -> failwith "invalid col"
+  | None :: (Some a) :: x -> (Some cell) :: (Some a) :: x
+  | None :: [] -> (Some cell)::[]
+  | Some _ :: _ -> raise full_col_err
+  | None :: x -> None :: push color v x
+  | [] -> raise full_col_err
 
 let rec insert col v st = 
   let board = st.board in
   let rec add col board = 
     match board with 
-    |a::b -> if col = 0 then (push st.player v a)::b else 
-        a::add (col-1) b
-    | [] -> failwith "invalid col" in 
-  { st with board = add col board; prev = Some st}
+    | a :: b -> if col = 0 then (push st.current_player v a) :: b else 
+        a :: add (col - 1) b
+    | [] -> raise invalid_col_err in { 
+    st with 
+    board = add col board; 
+    prev_state = Some st
+  }
 
 (** [skyfall lst] is list where all None elements are moved to the front and 
     all other options are moved to the bottem in the same order*)
@@ -191,12 +208,17 @@ let rec gravity st =
   let board = st.board in 
   let rec gravitation board =
     match board with
-    | a::b -> (skyfall a []):: gravitation (b)
-    | [] -> []
-  in
-  { st with board = gravitation board}
+    | a::b -> (skyfall a []):: gravitation b
+    | [] -> [] in { 
+    st with 
+    board = gravitation board
+  }
 
-let tick_turn t = { t with player = if t.player = Red then Blue else Red }
+let tick_turn t = { 
+  t with 
+  current_player = let (c1, c2) = t.player_colors in
+    if t.current_player = c1 then c2 else c1
+}
 
 let score st = 
   failwith "Unimplemented"
@@ -211,25 +233,40 @@ let rotate rep st =
       match b with 
       | [] -> acc
       | board -> rot_rec (map tl board) ((board |> map hd) :: acc) in 
-  if rep mod 4 = 1 then { st with board = rot_rec board [];prev = Some st} else 
-  if rep mod 4 = 2 then { st with board = map rev board |> rev ;prev = Some st}
-  else
-  if rep mod 4 = 3 then { st with board = [] |> rot_rec board |> map rev |> rev
-                                ;prev = Some st } else st
+  if rep mod 4 = 1 then { 
+    st with 
+    board = rot_rec board [];
+    prev_state = Some st
+  } else if rep mod 4 = 2 then {
+    st with 
+    board = map rev board |> rev;
+    prev_state = Some st
+  } else if rep mod 4 = 3 then { 
+    st with 
+    board = [] |> rot_rec board |> map rev |> rev;
+    prev_state = Some st 
+  } else st
 
 let undo st = 
-  match st.prev with
+  match st.prev_state with
   | Some t -> t
   | None -> failwith "Could not undo further"
+
+let style_of_color c = 
+  match c with 
+  | Red -> ANSITerminal.red
+  | Green -> ANSITerminal.green
+  | Yellow -> ANSITerminal.yellow
+  | Blue -> ANSITerminal.blue
+  | Magenta -> ANSITerminal.magenta
+  | Cyan -> ANSITerminal.cyan
 
 (** [print_cell] prints the cell according to its color and value. *)
 let print_cell c = 
   match c with 
   | None -> print_string "( )"
   | Some cell -> 
-    let style = match get_cell_color cell with 
-      | Red -> ANSITerminal.red
-      | Blue -> ANSITerminal.blue in
+    let style = cell |> get_cell_color |> style_of_color in
     "(" ^ (cell |> get_cell_value |> string_of_int) ^ ")" 
     |> ANSITerminal.(print_string [style])
 

@@ -12,11 +12,22 @@
 
 *)
 
+val invalid_col_err: exn
+val full_col_err: exn
+
 (** The colors of the chips and players. *)
-type color = Red | Blue
+type color = 
+  | Red
+  | Green
+  | Yellow
+  | Blue
+  | Magenta
+  | Cyan
 
 (** The color of the winning player or none if no player wins*)
-type win = RWin | BWin | NWin
+type win = 
+  | NWin
+  | Win of color
 
 (** A cell within the board with color and coordinate information. *)
 type cell
@@ -27,20 +38,17 @@ type board
 (** Abstract data type of values representing states. *)
 type t
 
-exception Error
 (** [get_cell_color c] is the color of the chip in cell [c]. *)
 val get_cell_color: cell -> color
 
 (** [get_cell_value c] is the integer point-value of cell [c]. *)
 val get_cell_value: cell -> int
 
-val get_state_color: t -> string
+val get_p1_color: t -> color
+val get_p2_color: t -> color
+val get_current_color: t -> color
 
-(** [check_win' t n] is true if someone has won the game where the condition is 
-    to have int [n] pices of their color in a row where their color is the 
-    player  color in [t] and the board checked is that of [t].
-    Requires: [n] is larger than 2 (for a real game) *)
-val check_win': t -> int -> bool
+val string_of_color: color -> string
 
 (** [check_win t n] is [BWin]\[RWin] if blue\red has won the game where the 
     condition is to have int [n] pices of their color in a row where the board 
@@ -69,10 +77,11 @@ val undo: t-> t
 
 val new_board: int -> int -> 'a option List.t List.t
 
-(** [new_state c row col] creates a new state with an empty board of size 
-    [row] by [col] where the starting player is of color [c]
+(** [new_state (c1, c2) row col] creates a new state with an empty board of size 
+    [row] by [col] where the players have colors [c1] and [c2] and the starting 
+    player has color [c1]. 
     Requires: [row] and [col] are larger than 0*)
-val new_state: color -> int -> int -> t
+val new_state: (color * color) -> int -> int -> t
 
 (** [score t] is the score of the game in its current state. *)
 val score: t -> int
@@ -81,6 +90,8 @@ val score: t -> int
     times. 
     Precondition: [rep] must be positive. *)
 val rotate: int -> t -> t
+
+val style_of_color: color -> ANSITerminal.style
 
 (** [print st] pretty-prints a visual representation of board in state [st] onto
     the command line. *)

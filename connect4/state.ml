@@ -220,8 +220,55 @@ let tick_turn t = {
     if t.current_player = c1 then c2 else c1
 }
 
-let score st = 
-  failwith "Unimplemented"
+let rec score_cell_helper y lst = 
+  match lst with 
+  | [] -> 0
+  | h::t -> if y = 0 then match h with 
+      | None -> 0 
+      | Some v -> let value = get_cell_value v in 
+        print_string "value"; print_int value; value
+    else let score = score_cell_helper (y-1) lst in 
+      print_string "y"; print_int y; score
+
+(**[score_cell_value x y board] is the int value of the piece in location 
+   ([x],[y]) in [board] *)
+let rec score_cell_value x y (board: cell option List.t List.t) : int =
+  match board with 
+  | [] -> 0
+  | h :: t -> 
+    print_int x;
+    print_int y;
+    print_string "\n";
+    if x = 0 then score_cell_helper y h
+    else score_cell_value (x-1) y t
+
+(**[calculate_score piece board n pattern] is the sum of [n] pieces on the [board]
+   starting at [piece] in [pattern] *)
+let rec calculate_score piece board n pattern = 
+  match pattern with 
+  | "vertical" -> 
+    if n = 0 then 0 
+    else let score = score_cell_value (fst piece) (snd piece) board in 
+      print_string "score:"; print_int score;
+      score + calculate_score (fst piece + 1, snd piece) board (n-1) pattern
+  | _ -> failwith "invalid pattern"
+
+let score t = 
+  let board = t.board in 
+  let (color, color') = t.player_colors in
+  let assoc = make_assoc color board 0 in 
+  (* let assoc' = make_assoc color' board 0 in *)
+  let rec vertical_score ass n : int = 
+    match ass with 
+    | a::b -> 
+      if check_vertical a ass n
+      then calculate_score a board n "vertical" + vertical_score b t.num_rows 
+      else vertical_score ass (n-1)
+    | [] -> 0 in
+  let temp =  vertical_score assoc (t.num_rows) in temp
+(* let h_len = find_max_horizontal assoc (t.num_rows) 0 in  *)
+(* failwith "unimplemented" *)
+
 
 (** [rotate st rep] is the state with a board rotated c-clockwise [rep] times. 
     Note: Does not implement chips fallins down. Han just needs this to 

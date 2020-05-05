@@ -1,14 +1,11 @@
-type object_phrase = string list
-
 (** The type [command] represents a player command that is decomposed
     into a verb and possibly an object phrase. *)
 type command = 
-  | Insert of object_phrase
-  | Rotate of object_phrase
+  | Insert of int * int
+  | Rotate of int
   | Score
   | Undo 
   | Quit
-
 
 (** Raised when an empty command is parsed. *)
 exception Empty
@@ -17,4 +14,3 @@ exception Empty
 exception Malformed
 
 val parse : string -> command
-

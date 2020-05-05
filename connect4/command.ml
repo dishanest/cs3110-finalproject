@@ -1,10 +1,6 @@
-(* Note: You may introduce new code anywhere in this file. *) 
-
-type object_phrase = string list
-
 type command = 
-  | Insert of object_phrase
-  | Rotate of object_phrase
+  | Insert of int * int
+  | Rotate of int
   | Score 
   | Undo
   | Quit
@@ -12,6 +8,16 @@ type command =
 exception Empty
 
 exception Malformed
+
+let parse_insert cmd_lst = 
+  match cmd_lst with 
+  | c :: v :: [] -> Insert (int_of_string c, int_of_string v) 
+  | _ -> raise Malformed
+
+let parse_rotate cmd_lst = 
+  match cmd_lst with 
+  | num :: [] -> Rotate (int_of_string num)
+  | _ -> raise Malformed
 
 (** [parse str] is the command that results from an input string: 
     - Splits words by ' ' and then filters out "". 
@@ -21,14 +27,13 @@ exception Malformed
     - If [str] is "quit", it uses the constructor [Quit]. 
 *)
 let parse str =
-  match String.split_on_char ' ' str 
+  match str |> String.trim |> String.split_on_char ' '
         |> List.filter (fun x -> x <> "") with
   | [] -> raise Empty
-  | h::t -> if h="quit" then Quit
-    else if h="insert" then Insert t
-    else if h="undo" then Undo
-    else if h="rotate" then Rotate t
-    else if h="score" then Score
+  | h :: t -> if h = "quit" && t = [] then Quit
+    else if h = "insert" then parse_insert t
+    else if h = "undo" && t = [] then Undo
+    else if h = "rotate" then parse_rotate t
+    else if h = "score" && t = [] then Score
     else raise Malformed
-
 

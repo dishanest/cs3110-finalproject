@@ -41,8 +41,6 @@ let print_colors_prompt () =
   ANSITerminal.(print_string [magenta] "Magenta, ");
   ANSITerminal.(print_string [cyan] "Cyan. \n")
 
-let colors_prompt  = "Please enter the colors of the players. \n"
-
 let input_prompt = " > "
 
 (** [start_game_str x y] is the string that introduces the game using a board of 
@@ -63,19 +61,15 @@ let print_cmd_prompt c =
   ANSITerminal.(print_string [style_of_color c] (string_of_color c ^ "\'s "));
   print_string "turn. Make your move: \"insert [column] [value]\", \"rotate [num]\", \"score\", \"undo\", \"quit\". \n"
 
-let invalid_col_err = "That column doesn't exist. \n"
+let print_err err_str = 
+  ANSITerminal.(print_string [red] ("~ERROR: " ^ err_str))
 
-let full_col_err = "That column is full. \n"
-
-let invalid_cmd_err = "Invalid command. Try again. \n"
+let same_color_err = "Player colors cannot be the same. \n\n"
+let invalid_col_err = "That column doesn't exist. \n\n"
+let full_col_err = "That column is full. \n\n"
+let invalid_cmd_err = "Invalid command. Try again. \n\n"
 
 (****************** End string resources for Main ******************)
-
-(** [get_next_el lst] returns the head of [lst] *)
-let get_next_el (lst: string list) : string = 
-  match lst with
-  | [] -> failwith "no next element"
-  | h :: t -> h
 
 (** [print_win st c] prints the state [st] and the win message. *)
 let print_win st c = 
@@ -90,49 +84,34 @@ let rec play st =
   print st;
   print_cmd_prompt (get_current_color st); 
   print_string input_prompt;
-  try let cmd = Command.parse (read_line()) in
+  try let cmd = Command.parse (read_line ()) in
     match cmd with
-    | Insert cmd_lst -> 
-      begin
-        match cmd_lst with
-        | [] -> ANSITerminal.(print_string[red] invalid_cmd_err); play st
-        | h::t -> 
-          let y = get_next_el t in
-          let new_st = try insert (int_of_string h) (int_of_string y) st 
-            with exn -> 
-              if exn = State.invalid_col_err then 
-                (ANSITerminal.(print_string[red] invalid_col_err); play st) 
-              else if exn = State.full_col_err then 
-                (ANSITerminal.(print_string[red] full_col_err); play st)
-              else play st in
-          let p1_color = get_p1_color new_st in 
-          let p2_color = get_p2_color new_st in 
-          if State.check_win new_st 4 = Win p1_color then 
-            print_win new_st p1_color
-          else if State.check_win new_st 4 = Win p2_color then 
-            print_win new_st p2_color
-          else new_st |> tick_turn |> play
+    | Insert (c, v) -> begin
+        let new_st = 
+          try insert c v st with exn -> 
+            if exn = State.invalid_col_err then 
+              (print_err invalid_col_err; play st)
+            else if exn = State.full_col_err then 
+              (print_err full_col_err; play st)
+            else play st in
+        check_win new_st
       end
     | Undo -> let st = undo st in play st
-    | Rotate cmd_lst -> 
-      begin
-        match cmd_lst with
-        | [] -> ANSITerminal.(print_string[red] invalid_cmd_err); play st
-        | h::t ->  
-          let new_st = st |> rotate (int_of_string h) |> gravity in 
-          let p1_color = get_p1_color new_st in 
-          let p2_color = get_p2_color new_st in
-          if State.check_win new_st 4 = Win p1_color then 
-            print_win new_st p1_color
-          else if State.check_win new_st 4 = Win p2_color then 
-            print_win new_st p2_color
-          else new_st |> tick_turn |> play
-      end
+    | Rotate num -> let new_st = st |> rotate num |> gravity in check_win new_st
     | Score -> st |> score |> string_of_int |> print_string; play st
-    | Quit -> ANSITerminal.(print_string[red] "Goodbye.\n"); exit 0 
+    | Quit -> ANSITerminal.(print_string[green] "Bye-bye!\n"); exit 0 
   with
-  | Empty -> ANSITerminal.(print_string[red] invalid_cmd_err); play st
-  | Malformed -> ANSITerminal.(print_string[red] invalid_cmd_err); play st
+  | Empty -> print_err invalid_cmd_err; play st
+  | Malformed -> print_err invalid_cmd_err; play st
+
+and check_win new_st = 
+  let c1 = get_p1_color new_st in 
+  let c2 = get_p2_color new_st in 
+  if State.check_win new_st 4 = Win c1 then 
+    print_win new_st c1
+  else if State.check_win new_st 4 = Win c2 then 
+    print_win new_st c2
+  else new_st |> tick_turn |> play
 
 let start_game ((r, c):int * int) ((c1, c2):color * color) =
   print_start_game (r, c) (c1, c2);
@@ -155,18 +134,29 @@ let intro_repl () =
     print_string dimensions_prompt;
     print_string input_prompt;
     match read_line () |> String.trim |> String.split_on_char ' ' with 
-    | e :: [] -> if e = "" then (6, 7) else (print_endline invalid_cmd_err; dimensions_repl ())
+    | e :: [] -> if e = "" then (6, 7) else (print_err invalid_cmd_err; dimensions_repl ())
     | r :: c :: [] -> (int_of_string r, int_of_string c)
-    | _ -> print_endline invalid_cmd_err; dimensions_repl () 
+    | _ -> print_err invalid_cmd_err; dimensions_repl () 
   end in
   let rec colors_repl () : (color * color) = begin
     print_colors_prompt ();
     print_string input_prompt;
     match read_line () |> String.trim |> String.split_on_char ' ' with 
-    | e :: [] -> if e = "" then (Red, Blue) else (print_endline invalid_cmd_err; colors_repl ())
-    | c1 :: c2 :: [] -> (color_of_str c1, color_of_str c2)
-    | _ -> print_endline invalid_cmd_err; colors_repl ()
-  end in start_game (dimensions_repl ()) (colors_repl ())
+    | e :: [] -> 
+      if e = "" then (Red, Blue) 
+      else (print_err invalid_cmd_err; colors_repl ())
+    | c1 :: c2 :: [] -> 
+      if c1 = c2 then (print_err same_color_err; colors_repl ()) 
+      else (color_of_str c1, color_of_str c2)
+    | _ -> print_err invalid_cmd_err; colors_repl ()
+  end in 
+  let (c1, c2) = colors_repl () in
+  print_string "Player 1 is ";
+  ANSITerminal.(print_string [style_of_color c1] (string_of_color c1));
+  print_string " and Player 2 is ";
+  ANSITerminal.(print_string [style_of_color c2] (string_of_color c2));
+  print_string ". \n";
+  start_game (dimensions_repl ()) (c1, c2)
 
 let main () =
   print_welcome ();

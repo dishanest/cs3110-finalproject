@@ -138,7 +138,7 @@ let check_vertical piece assoc n =
       mem (fst piece +2, snd piece) assoc && 
       mem (fst piece +3, snd piece) assoc then true else false
   *)
-  check_pattern piece assoc n (1,0)
+  check_pattern piece assoc n (0,1)
 
 (** [check_horizontal piece assoc n] is the bool of whether there is a vertical 
     of int [n] pieces in assoc that contains [piece]*)
@@ -147,7 +147,7 @@ let check_horizontal piece assoc n =
       mem (fst piece , snd piece +2) assoc && 
       mem (fst piece , snd piece +3) assoc then true else false
   *)
-  check_pattern piece assoc n (0,1)
+  check_pattern piece assoc n (1,0)
 
 (** [check_diagonal piece assoc n] is the bool of whether there is a diagonal 
     of int [n] pieces in assoc that contains [piece]*)
@@ -301,101 +301,6 @@ let rotate rep st =
     prev_state = Some st 
   } else st
 
-let rec score_cell_helper y lst = 
-  match lst with 
-  | [] ->  0
-  | h::t -> if y = 0 then
-      match h with 
-      | None -> 0 
-      | Some v -> get_cell_value v
-    else score_cell_helper (y-1) t
-
-(**[score_cell_value x y board] is the int value of the piece in location 
-   ([x],[y]) in [board] *)
-let rec score_cell_value x y (board: cell option List.t List.t) : int =
-  match board with 
-  | [] -> 0
-  | h::t -> 
-    if x = 0 then score_cell_helper y h
-    else score_cell_value (x-1) y t
-
-(**[calculate_score piece board n pattern] is the sum of [n] pieces on the [board]
-   starting at [piece] in [pattern] *)
-let rec calculate_score piece board n pattern = 
-  match pattern with 
-  | "vertical" -> 
-    if n = 0 then 0 
-    else 
-      let score = score_cell_value (snd piece) (fst piece) board in 
-      score + calculate_score (fst piece, snd piece+1) board (n-1) pattern  
-  | "horizontal" -> 
-    if n = 0 then 0 
-    else 
-      let score = score_cell_value (snd piece) (fst piece) board in 
-      score + calculate_score (fst piece+1, snd piece) board (n-1) pattern  
-  | _ -> failwith "invalid pattern"
-
-let rec update_assoc ass cons pattern = 
-  match pattern with 
-  | "vertical" -> begin
-      match ass with 
-      | [] -> [] 
-      | h::t -> if (fst h) = cons then 
-          update_assoc t cons pattern 
-        else h::(update_assoc t cons pattern)
-    end
-  | "horizontal" -> 
-    begin
-      match ass with 
-      | [] -> []
-      | h::t -> if (snd h) = cons then 
-          update_assoc t cons pattern 
-        else h::(update_assoc t cons pattern)
-    end
-  | _ -> failwith "invalid pattern"
-
-let score t = 
-  let board = t |> rotate 3 |> fun x -> x.board |> map rev in
-  let (color, color') = t.player_colors in
-  let assoc = make_assoc color board 0 in 
-  let assoc' = make_assoc color' board 0 in 
-  let rec vertical_score ass n : int = 
-    match ass with 
-    | a::b -> 
-      if check_vertical a ass n
-      then 
-        let x = calculate_score a board n "vertical" in 
-        let new_ass = update_assoc ass (fst a) "vertical" in
-        (* print_int n; print_string "\n"; *)
-        if x = 10 
-        then 10 + vertical_score new_ass (fst t.dimensions)
-        else 
-          vertical_score new_ass (fst t.dimensions)
-      else vertical_score ass (n-1)
-    | [] -> 0 in  
-  let rec horizontal_score ass n : int = 
-    match ass with 
-    | a::b -> 
-      if check_horizontal a ass n
-      then 
-        let x = calculate_score a board n "horizontal" in 
-        let new_ass = update_assoc ass (snd a) "horizontal" in
-        (* print_int x; print_string "\n"; *)
-        if x = 10 
-        then 10 + horizontal_score new_ass (snd t.dimensions)
-        else 
-          horizontal_score new_ass (snd t.dimensions)
-      else horizontal_score ass (n-1)
-    | [] -> 0 in
-  let v1 =  vertical_score assoc (fst t.dimensions) in 
-  let h1 = horizontal_score assoc (snd t.dimensions) in 
-  let v2 =  vertical_score assoc' (fst t.dimensions) in 
-  let h2 = horizontal_score assoc' (snd t.dimensions) in 
-  (* let d1 = diagonal_score assoc (t.num_cols) in  *)
-  (v1+h1, v2+h2)
-(* let h_len = find_max_horizontal assoc (t.num_rows) 0 in  *)
-(* failwith "unimplemented" *)
-
 let undo st = 
   match st.prev_state with
   | Some t -> t
@@ -468,3 +373,98 @@ let print_win st win_color =
     | [] -> () 
     | h :: t -> print_row h (r, 0); print_string "\n"; print_board t (r + 1)
   in print_board board 0
+
+
+let rec score_cell_helper y lst = 
+  match lst with 
+  | [] ->  0
+  | h::t -> if y = 0 then
+      match h with 
+      | None -> 0 
+      | Some v -> get_cell_value v
+    else score_cell_helper (y-1) t
+
+(**[score_cell_value x y board] is the int value of the piece in location 
+   ([x],[y]) in [board] *)
+let rec score_cell_value x y (board: cell option List.t List.t) : int =
+  match board with 
+  | [] -> 0
+  | h::t -> 
+    if x = 0 then score_cell_helper y h
+    else score_cell_value (x-1) y t
+
+(**[calculate_score piece board n pattern] is the sum of [n] pieces on the [board]
+   starting at [piece] in [pattern] *)
+let rec calculate_score piece board n pattern = 
+  match pattern with 
+  | "vertical" -> 
+    if n = 0 then 0 
+    else 
+      let score = score_cell_value (snd piece) (fst piece) board in 
+      score + calculate_score (fst piece, snd piece+1) board (n-1) pattern  
+  | "horizontal" -> 
+    if n = 0 then 0 
+    else 
+      let score = score_cell_value (snd piece) (fst piece) board in 
+      score + calculate_score (fst piece+1, snd piece) board (n-1) pattern  
+  | _ -> failwith "invalid pattern"
+
+let rec update_assoc ass cons pattern = 
+  match pattern with 
+  | "vertical" -> begin
+      match ass with 
+      | [] -> [] 
+      | h::t -> if (fst h) = cons then 
+          update_assoc t cons pattern 
+        else h::(update_assoc t cons pattern)
+    end
+  | "horizontal" -> begin
+      match ass with 
+      | [] -> []
+      | h::t -> if (snd h) = cons then 
+          update_assoc t cons pattern 
+        else h::(update_assoc t cons pattern)
+    end
+  | _ -> failwith "invalid pattern"
+
+let score t = 
+  let board = t |> rotate 3 |> fun x -> x.board |> map rev in
+  let (color, color') = t.player_colors in
+  let assoc = make_assoc color board 0 in 
+  let assoc' = make_assoc color' board 0 in 
+  let rec vertical_score ass n : int = 
+    match ass with 
+    | a::b -> 
+      if check_vertical a ass n
+      then 
+        let x = calculate_score a board n "vertical" in 
+        let new_ass = update_assoc ass (fst a) "vertical" in
+        (* print_int n; print_string "\n"; *)
+        if x = 10 
+        then 10 + vertical_score new_ass (fst t.dimensions)
+        else 
+          vertical_score new_ass (fst t.dimensions)
+      else vertical_score ass (n-1)
+    | [] -> 0 in  
+  let rec horizontal_score ass n : int = 
+    match ass with 
+    | a::b -> 
+      if check_horizontal a ass n
+      then 
+        let x = calculate_score a board n "horizontal" in 
+        let new_ass = update_assoc ass (snd a) "horizontal" in
+        (* print_int x; print_string "\n"; *)
+        if x = 10 
+        then 10 + horizontal_score new_ass (snd t.dimensions)
+        else 
+          horizontal_score new_ass (snd t.dimensions)
+      else horizontal_score ass (n-1)
+    | [] -> 0 in
+  let v1 =  vertical_score assoc (fst t.dimensions) in 
+  let h1 = horizontal_score assoc (snd t.dimensions) in 
+  let v2 =  vertical_score assoc' (fst t.dimensions) in 
+  let h2 = horizontal_score assoc' (snd t.dimensions) in 
+  (* let d1 = diagonal_score assoc (t.num_cols) in  *)
+  (v1+h1, v2+h2)
+(* let h_len = find_max_horizontal assoc (t.num_rows) 0 in  *)
+(* failwith "unimplemented" *)

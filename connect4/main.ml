@@ -4,8 +4,8 @@ open Ai
 open String
 
 (* TODO: 
-   - main has to validate user input to guarantee all the preconditions. 
-     -- When the game begins, size of the board should be at least 4x4
+   - print column numbers below columns
+   - pretty-print scores
 *)
 
 (** Stuff main needs to do:

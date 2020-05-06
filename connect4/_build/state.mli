@@ -46,6 +46,7 @@ val get_p1_color: t -> color
 val get_p2_color: t -> color
 val get_current_color: t -> color
 val get_dimensions: t -> (int * int)
+val get_gamemode: t -> bool
 
 val string_of_color: color -> string
 
@@ -88,7 +89,7 @@ val new_board: int -> int -> 'a option List.t List.t
     [row] by [col] where the players have colors [c1] and [c2] and the starting 
     player has color [c1]. 
     Requires: [row] and [col] are larger than 4. *)
-val new_state: (color * color) -> (int * int) -> t
+val new_state: (color * color) -> (int * int) -> bool -> t
 
 (** [score st] is the score (s1, s2) of the game in its current state [st], 
     where s1 is player 1's score and s2 is player 2's score. *)

@@ -2,6 +2,7 @@
     into a verb and possibly an object phrase. *)
 type command = 
   | Insert of int * int
+  | RInsert of int
   | Rotate of int
   | Score
   | Switch

@@ -35,6 +35,7 @@ type t = {
   current_player: color;
   score: int;
   prev_state: t option;
+  random: bool;
 } 
 
 let get_cell_color c = c.color
@@ -49,6 +50,8 @@ let get_p2_color st =
 let get_dimensions st = st.dimensions
 
 let get_current_color st = st.current_player
+
+let get_gamemode st = st.random 
 
 let string_of_color c = 
   match c with
@@ -77,7 +80,6 @@ let rec make_assoc color board col =
   match board with 
   | [] -> []
   | x :: y -> (list_assoc color x 0 col) @ (make_assoc color y (col+1))
-
 
 let rec check_full st = 
   let board = st.board in
@@ -200,14 +202,15 @@ let rec new_column len =
 let rec new_board row col = 
   if row = 0 then [] else (new_column col)::(new_board (row-1) col)
 
-let new_state (c1, c2) (rows, cols) = 
+let new_state (c1, c2) (rows, cols) random = 
   if rows >= 4 && cols >= 4 then {
     dimensions = (rows, cols);
     player_colors = (c1, c2);
     board = (new_board cols rows); 
     current_player = c1; 
     score = 0; 
-    prev_state = None
+    prev_state = None;
+    random = random;
   } else raise invalid_dimensions_err
 
 (** [push color v lst] is the list [lst] with a cell of color [color] and

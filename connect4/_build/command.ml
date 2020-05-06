@@ -1,5 +1,6 @@
 type command = 
   | Insert of int * int
+  | RInsert of int
   | Rotate of int
   | Score 
   | Switch
@@ -12,6 +13,7 @@ exception Malformed
 
 let parse_insert cmd_lst = 
   match cmd_lst with 
+  | c::[] -> RInsert (int_of_string c)
   | c :: v :: [] -> Insert (int_of_string c, int_of_string v) 
   | _ -> raise Malformed
 
@@ -42,6 +44,7 @@ let parse str =
 let string_of_cmd cmd = 
   match cmd with 
   | Insert (c, v) -> "insert " ^ string_of_int c ^ " " ^ string_of_int v
+  | RInsert c -> "insert " ^ string_of_int c
   | Rotate n -> "rotate " ^ string_of_int n
   | Score -> "score"
   | Switch -> "switch"

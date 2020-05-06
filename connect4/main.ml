@@ -55,6 +55,11 @@ If either Player 1 or Player 2 is a CPU, type "p[n] [difficulty]".
 If not, press enter. 
 |}
 
+let game_mode_prompt = {|
+If you want to play with random valued chips, type "random". 
+If not, press enter. 
+|}
+
 let input_prompt = " > "
 
 (** [start_game_str x y] is the string that introduces the game using a board of 
@@ -163,7 +168,7 @@ let print_loadup c1 c2 =
     if reps = 0 then (stall stall_time; st)
     else let st' = (print_stripe start fin st) |> tick_turn in 
       stripe_rec start fin (reps - 1) st' in
-  let st = new_state (c2 , c1) (6, 7) in
+  let st = new_state (c2 , c1) (6, 7) false in
   let st = st |> stripe_rec 0 6 3 |> stripe_rec 3 6 3 in
   stall stall_time;
   let ins_prnt_stall c v st = 
@@ -210,8 +215,16 @@ let rec play (ai1_opt, ai2_opt) st : State.t =
   | Empty -> print_err invalid_cmd_err; play (ai1_opt, ai2_opt) st 
   | Malformed -> print_err invalid_cmd_err; play (ai1_opt, ai2_opt) st 
 
-and eval_cmd ai_opts st cmd = 
+and eval_cmd ai_opts st (cmd:command) = 
   match cmd with
+  | RInsert c ->  
+    print_string "rinsert";
+    if get_gamemode st then 
+      let value = Random.int 10 |> string_of_int in 
+      let new_cmd = "insert "^(string_of_int c)^" "^(value) in 
+      print_string new_cmd;  
+      eval_cmd ai_opts st (Command.parse new_cmd)
+    else (print_err invalid_cmd_err; play ai_opts st)
   | Insert (c, v) -> begin
       let new_st = 
         try insert c v st with exn -> 
@@ -250,9 +263,9 @@ and check_win ai_opts new_st  =
     print_win new_st c2
   else new_st |> tick_turn |> play ai_opts
 
-let start_game ((r, c):int * int) ((c1, c2):color * color) ai_opts =
+let start_game ((r, c):int * int) ((c1, c2):color * color) ai_opts random =
   print_start_game (r, c) (c1, c2);
-  let st = new_state (c1, c2) (r, c) in
+  let st = new_state (c1, c2) (r, c) random in
   play ai_opts st |> ignore 
 
 let color_of_str str = 
@@ -312,6 +325,13 @@ let rec cpu_repl () : (difficulty option * difficulty option) = begin
   | _ -> print_err invalid_cmd_err; cpu_repl ()
 end
 
+let rec random_repl () = 
+  print_string game_mode_prompt;
+  print_string input_prompt;
+  match read_line () |> lowercase_ascii |> trim with 
+  | "random" -> true
+  | _ -> false
+
 let intro_repl () = 
   let (c1, c2) = colors_repl () in
   let (ai1_opt, ai2_opt) = cpu_repl () in
@@ -328,7 +348,13 @@ let intro_repl () =
   print_cpu ai2_opt;
   ANSITerminal.(print_string [style_of_color c2] (string_of_color c2));
   print_string ". \n";
-  start_game (dimensions_repl ()) (c1, c2) (ai1_opt, ai2_opt)
+  let random = random_repl () in 
+  let print_random random = 
+    match random with 
+    | true -> print_string "Gamemode: random"; 
+    | false -> print_string "Gamemode: normal"; in 
+  print_random random;
+  start_game (dimensions_repl ()) (c1, c2) (ai1_opt, ai2_opt) random
 
 let main () =
   (* TODO: uncomment this. 

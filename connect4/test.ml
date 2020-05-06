@@ -6,11 +6,11 @@ open State
 
 
 let three_red_col = 
-  (new_state (Red, Blue) (6, 7)) |> insert 0 0 |> insert 0 0 |> insert 0 0
+  (new_state (Red, Blue) (6, 7) false) |> insert 0 0 |> insert 0 0 |> insert 0 0
 let three_red_row = 
-  (new_state (Red, Blue) (6, 7)) |> insert 0 0 |> insert 1 0 |> insert 2 0
+  (new_state (Red, Blue) (6, 7) false) |> insert 0 0 |> insert 1 0 |> insert 2 0
 let diag = 
-  (new_state (Red, Blue)  (6, 7)) |> insert 0 0 |> tick_turn |> insert 1 0 |> tick_turn |> insert 1 0 |> tick_turn 
+  (new_state (Red, Blue)  (6, 7) false) |> insert 0 0 |> tick_turn |> insert 1 0 |> tick_turn |> insert 1 0 |> tick_turn 
   |> insert 2 0 |> tick_turn |> insert 2 0 |> tick_turn |> insert 3 0 |> tick_turn |> insert 2 0 |> tick_turn |> insert 3 0 |> tick_turn 
   |> insert 3 0 |> tick_turn |> insert 0 0 |> tick_turn |> insert 3 0
 

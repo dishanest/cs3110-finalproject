@@ -19,12 +19,15 @@ open Command
 *)
 
 (****************** Begin string resources for Main ******************)
+let stall_time = 0.15
+
+let loading_str = "Loading... \n"
 
 let print_welcome () = 
-  print_string "\n~~ Welcome to ";
-  ANSITerminal.(print_string [red] "Connect ");
-  ANSITerminal.(print_string [blue] "Mour ");
-  print_string "~~ \n\nFor the best experience, expand your terminal to half the screen. \n\n"
+  print_string "\n~~~ Welcome to ";
+  ANSITerminal.(print_string [red; Bold] "Connect ");
+  ANSITerminal.(print_string [blue; Bold] "Mour ");
+  print_string "~~~ \n\nFor the best experience, adjust your terminal to show 22 lines. \n\n"
 
 let dimensions_prompt = "\nHit enter to play on the classic 6 x 7 board. \nElse type \"Rows Columns\" with each dimension between 0 and 50. \n"
 
@@ -54,29 +57,55 @@ let print_start_game (x, y) (c1, c2)=
   print_string ("with a " ^ r ^ " x " ^ c ^ " board. \n")
 
 (* TODO: update the instructions *)
-let instructions = "These are the rules: the first player to connect 4 chips wins. \nTo exit game, type \'quit\'. \n"
+let print_instructions () = 
+  ANSITerminal.(print_string [Bold] "These are the rules: \n");
+  print_string "  GOAL: Score more points than your opponent. 
+  1. The first player to connect 4 pieces in a horizontal, vertical, or diagonal
+     line ends the game and earns 20 points. 
+  2. Consecutive horizontal, vertical, and diagonal pieces with points that add 
+     up to exactly 10 give the corresponding player 10 points. Thus it is 
+     possible to win without connecting 4 pieces in a row. 
+  3. You may place as many 0 pieces as you want, but you can place only one of 
+     each piece from 1-9. \n";
+  ANSITerminal.(print_string [Bold] "How to play: \n");
+  print_string "  On your turn, you can either insert a piece, rotate the board, or switch the 
+  colors of the pieces on the board. Here are the commands you can type: 
+   - Insert piece: \"insert [column number] [0...9]\" 
+   - Rotate board: \"rotate [number of times to rotate]\"
+   - Switch colors: \"switch\"
+   - Check score: \"score\"
+   - Undo move: \"undo\"
+   - Quit game: \'quit\' \n\n"
 
 let print_cmd_prompt c = 
   print_string "\nIt\'s ";
   ANSITerminal.(print_string [style_of_color c] (string_of_color c ^ "\'s "));
-  print_string "turn. Make your move: \"insert [column] [value]\", \"rotate [num]\", \"score\", \"undo\", \"quit\". \n"
+  print_string "turn. Make your move: \"insert [column] [value]\", \"rotate [num]\", \"switch\", \"score\", \"undo\", \"quit\". \n"
 
 let print_err err_str = 
-  ANSITerminal.(print_string [red] ("~ERROR: " ^ err_str))
+  ANSITerminal.(print_string [red] ("~ERROR: " ^ err_str ^ " \n\n"))
 
-let same_color_err = "Player colors cannot be the same. \n\n"
-let invalid_col_err = "That column doesn't exist. \n\n"
-let full_col_err = "That column is full. \n\n"
-let invalid_cmd_err = "Invalid command. Try again. \n\n"
+let same_color_err = "Player colors cannot be the same."
+let invalid_col_err = "That column doesn't exist."
+let full_col_err = "That column is full."
+let invalid_cmd_err = "Invalid command. Try again."
+let undo_err = "Cannot undo without first making a move."
 
 (****************** End string resources for Main ******************)
 
 (** [print_win st c] prints the state [st] and the win message. *)
 let print_win st c = 
-  print st;
-  print_string ("Game over! ");
+  print_win st c;
+  (* TODO: uncomment this when score is done. 
+     let c1 = get_p1_color st in
+     let c2 = get_p2_color st in
+     ANSITerminal.(print_string [style_of_color c1] (string_of_color c1));
+     print_string (": " ^ (st |> score |> string_of_int) ^ "points\n");
+     ANSITerminal.(print_string [style_of_color c2] (string_of_color c2));
+     print_string (": " ^ (st |> score |> string_of_int) ^ "points\n"); *)
+  print_string "\nGame over! ";
   ANSITerminal.(print_string[style_of_color c] (string_of_color c));
-  print_string (" wins!");
+  print_string " wins!";
   print_newline ();
   exit 0
 
@@ -100,89 +129,44 @@ let stall (time) =
   ignore (Unix.select [] [] [] time)
 
 let print_space () = 
-  print_newline ();
-  print_newline ();
-  print_newline ();
-  print_newline ();
-  print_newline ();
-  print_newline ();
-  print_newline ();
-  print_newline ();
-  print_newline ();
-  print_newline ();
-  print_newline ()
+  let rec space_rec i = 
+    if i = 0 then () 
+    else (print_newline (); space_rec (i-1)) in
+  space_rec 10
 
 let rec print_stripe start fin st = 
   let st = insert start 0 st in
-  if start = fin then 
-    (st)
-  else 
-    (stall 0.2;
-     print st;
-     print_space ();
-     print_stripe (start +1) fin st)
+  if start = fin then (st)
+  else begin 
+    stall stall_time;
+    print_string loading_str;
+    print st;
+    print_space ();
+    print_stripe (start + 1) fin st 
+  end
 
 let print_loadup c1 c2 = 
-  let st = new_state (c1,c2)  6 6 in
-  let st = print_stripe 0 5 st in
-  let st  = tick_turn st in
-  let st = print_stripe 0 5 st in
-  let st  = tick_turn st in
-  let st = print_stripe 0 5 st in
-  let st  = tick_turn st in
-  let st = print_stripe 3 5 st in
-  let st  = tick_turn st in
-  let st = print_stripe 3 5 st in
-  let st  = tick_turn st in
-  let st = print_stripe 3 5 st in
-  stall 0.2;
-
-  let st  = tick_turn st in
-  let st =  insert 0 0 st in 
-  print st;
-  stall 0.2;
-
-  let st  = tick_turn st in
-  let st =  insert 1 0 st in 
-  print_space ();
-  print st;
-  stall 0.2;
-  let st =  insert 0 0 st in 
-  print_space ();
-  print st;
-  stall 0.2;
-
-  let st  = tick_turn st in
-  let st =  insert 2 0 st in 
-  print_space ();
-  print st;
-  stall 0.2;
-  let st =  insert 1 0 st in 
-  print_space ();
-  print st;
-  stall 0.2;
-  let st =  insert 0 0 st in 
-  print_space ();
-  print st;
-  stall 0.2;
-
-  let st  = tick_turn st in
-  let st =  insert 2 0 st in 
-  print_space ();
-  print st;
-  stall 0.2;
-  let st =  insert 1 0 st in 
-  print_space ();
-  print st;
-  stall 0.2;
-
-  let st  = tick_turn st in
-  let st =  insert 2 0 st in 
-  print_space ();
-  print st;
-
-  print_space ();
-  stall 2.0;
+  let rec stripe_rec start fin reps st = 
+    if reps = 0 then (stall stall_time; st)
+    else begin
+      let st' = (print_stripe start fin st) |> tick_turn in 
+      stripe_rec start fin (reps - 1) st' 
+    end in
+  let st = new_state (c2 , c1) 6 7 in
+  let st = st |> stripe_rec 0 6 3 |> stripe_rec 3 6 3 in
+  stall stall_time;
+  let ins_prnt_stall c v st = 
+    let st' = st |> insert c v |> tick_turn in
+    print_string loading_str;
+    State.print st';
+    print_space ();
+    stall stall_time;
+    st' in
+  let _ = st |> ins_prnt_stall 0 0 |> ins_prnt_stall 1 0 
+          |> ins_prnt_stall 2 0 |> ins_prnt_stall 0 0 |> ins_prnt_stall 1 0
+          |> ins_prnt_stall 2 0 |> ins_prnt_stall 0 0 |> ins_prnt_stall 1 0 
+          |> ins_prnt_stall 2 0 in
+  stall 0.75;
   print_space ();
   print_space ()
 
@@ -200,10 +184,15 @@ let rec play st =
               (print_err invalid_col_err; play st)
             else if exn = State.full_col_err then 
               (print_err full_col_err; play st)
-            else play st in
+            else (print_err invalid_cmd_err; play st) in
         check_win new_st
       end
-    | Undo -> let st = undo st in play st
+    | Undo -> begin
+        try let st = undo st in play st with exn -> 
+          if exn = State.undo_err then 
+            (print_err undo_err; play st) 
+          else (print_err invalid_cmd_err; play st)
+      end
     | Rotate num -> let new_st = st |> rotate num |> gravity in check_win new_st
     | Score -> st |> score |> string_of_int |> print_string; play st
     | Switch -> st |> switch_colors |> check_win
@@ -222,9 +211,7 @@ and check_win new_st =
   else new_st |> tick_turn |> play
 
 let start_game ((r, c):int * int) ((c1, c2):color * color) =
-  print_loadup c1 c2;
   print_start_game (r, c) (c1, c2);
-  print_string instructions;
   let st = new_state (c1, c2) r c in
   play st |> ignore
 
@@ -268,7 +255,10 @@ let intro_repl () =
   start_game (dimensions_repl ()) (c1, c2)
 
 let main () =
+  (* TODO: uncomment this. 
+     print_loadup Red Blue; *)
   print_welcome ();
+  print_instructions ();
   intro_repl ()
 
 let () = main ()

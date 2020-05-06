@@ -1,6 +1,6 @@
 ### Starting build.
 # Target: main.ml.depends, tags: { package(ANSITerminal), package(oUnit), extension:ml, file:main.ml, ocaml, ocamldep, quiet, traverse }
-ocamlfind ocamldep -package oUnit -package ANSITerminal -modules main.ml > main.ml.depends # cached
+ocamlfind ocamldep -package oUnit -package ANSITerminal -modules main.ml > main.ml.depends
 # Target: command.mli.depends, tags: { package(ANSITerminal), package(oUnit), extension:mli, file:command.mli, ocaml, ocamldep, quiet, traverse }
 ocamlfind ocamldep -package oUnit -package ANSITerminal -modules command.mli > command.mli.depends # cached
 # Target: command.cmi, tags: { package(ANSITerminal), package(oUnit), byte, compile, extension:mli, file:command.mli, interf, ocaml, quiet, traverse }
@@ -10,7 +10,7 @@ ocamlfind ocamldep -package oUnit -package ANSITerminal -modules state.mli > sta
 # Target: state.cmi, tags: { package(ANSITerminal), package(oUnit), byte, compile, extension:mli, file:state.mli, interf, ocaml, quiet, traverse }
 ocamlfind ocamlc -c -package oUnit -package ANSITerminal -o state.cmi state.mli # cached
 # Target: main.cmo, tags: { package(ANSITerminal), package(oUnit), byte, compile, extension:cmo, extension:ml, file:main.cmo, file:main.ml, implem, ocaml, quiet, traverse }
-ocamlfind ocamlc -c -package oUnit -package ANSITerminal -o main.cmo main.ml # cached
+ocamlfind ocamlc -c -package oUnit -package ANSITerminal -o main.cmo main.ml
 # Target: command.ml.depends, tags: { package(ANSITerminal), package(oUnit), extension:ml, file:command.ml, ocaml, ocamldep, quiet, traverse }
 ocamlfind ocamldep -package oUnit -package ANSITerminal -modules command.ml > command.ml.depends # cached
 # Target: command.cmo, tags: { package(ANSITerminal), package(oUnit), byte, compile, extension:cmo, extension:ml, file:command.cmo, file:command.ml, implem, ocaml, quiet, traverse }
@@ -20,5 +20,5 @@ ocamlfind ocamldep -package oUnit -package ANSITerminal -modules state.ml > stat
 # Target: state.cmo, tags: { package(ANSITerminal), package(oUnit), byte, compile, extension:cmo, extension:ml, file:state.cmo, file:state.ml, implem, ocaml, quiet, traverse }
 ocamlfind ocamlc -c -package oUnit -package ANSITerminal -o state.cmo state.ml # cached
 # Target: main.byte, tags: { package(ANSITerminal), package(oUnit), byte, dont_link_with, extension:byte, file:main.byte, link, ocaml, program, quiet, traverse }
-ocamlfind ocamlc -linkpkg -package oUnit -package ANSITerminal command.cmo state.cmo main.cmo -o main.byte # cached
+ocamlfind ocamlc -linkpkg -package oUnit -package ANSITerminal command.cmo state.cmo main.cmo -o main.byte
 # Compilation successful.

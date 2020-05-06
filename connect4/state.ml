@@ -2,6 +2,7 @@ open List
 
 let invalid_col_err = Failure "Invalid column. "
 let full_col_err = Failure "Column is full. "
+let undo_err = Failure "Cannot undo further. "
 
 type color = 
   | Red
@@ -34,6 +35,22 @@ type t = {
   score: int;
   prev_state: t option;
 } 
+
+(** [check_val_used c v st] is true if the player of color [c] has already 
+    inserted a chip of int [v] in state [st]. *)
+let check_val_used c v st = 
+  let rec check_board b acc = 
+    match b with 
+    | [] -> acc 
+    | h :: t -> 
+      let get_value cell_opt = 
+        match cell_opt with 
+        | Some { color; value } -> 
+          if color = c then value else 0
+        | None -> 0 in
+      let values = map get_value h in
+      check_board t (acc && mem v values) in 
+  check_board st.board true
 
 let get_cell_color c = c.color
 let get_cell_value c = c.value
@@ -69,7 +86,7 @@ let rec list_assoc color lst row col =
 (** [make_assoc color board col] is an association list from an int r to an int
     c where r is the row and c is the column of all cells of 
     color [color] in [t] Requires: col begins at 0*)
-let rec make_assoc color board col= 
+let rec make_assoc color board col = 
   match board with 
   | [] -> []
   | x :: y -> (list_assoc color x 0 col) @ (make_assoc color y (col+1))
@@ -99,10 +116,8 @@ let switch_colors st =
   let rec iter board = 
     match board with 
     | a::b -> (switch_row_color a st):: iter b
-    | [] -> []
-  in
-  let new_board = iter board in 
-  { 
+    | [] -> [] in
+  let new_board = iter board in { 
     st with 
     board = new_board; 
     prev_state = Some st
@@ -111,35 +126,37 @@ let switch_colors st =
 (** [check_pattern piece assoc n pattern] is the bool of whether there is a 
     group of int [n] pieces of the same color in a pattern [pattern] in 
     the list [assoc] where one of the pieces in the group is [piece]
-    Requires: n is *)
+    Requires: n is > 0. *)
 let rec check_pattern piece assoc n pattern = 
-  match pattern with
-  | (1,0) when n>0 ->  mem (fst piece +(n-1), snd piece) assoc && 
-                       check_pattern piece assoc (n-1) pattern
-  | (0,1) when n>0 ->  mem (fst piece , snd piece +(n-1)) assoc && 
-                       check_pattern piece assoc (n-1) pattern
-  | (1,1) when n>0 ->  mem (fst piece +(n-1), snd piece +(n-1)) assoc && 
-                       check_pattern piece assoc (n-1) pattern  
-  | (1,-1) when n>0 ->  mem (fst piece +(n-1), snd piece -(n-1)) assoc && 
-                        check_pattern piece assoc (n-1) pattern   
-  | (-1,1) when n>0 ->  mem (fst piece -(n-1), snd piece +(n-1)) assoc && 
-                        check_pattern piece assoc (n-1) pattern  
-  | (-1,-1) when n>0 ->  mem (fst piece -(n-1), snd piece -(n-1)) assoc && 
-                         check_pattern piece assoc (n-1) pattern                                        
-  |_ -> true
+  if n > 0 then 
+    match pattern with
+    | (1,0) -> mem (fst piece + (n - 1), snd piece) assoc && 
+               check_pattern piece assoc (n - 1) pattern
+    | (0,1) -> mem (fst piece , snd piece + (n - 1)) assoc && 
+               check_pattern piece assoc (n - 1) pattern
+    | (1,1) -> mem (fst piece + (n - 1), snd piece + (n - 1)) assoc && 
+               check_pattern piece assoc (n - 1) pattern  
+    | (1,-1) -> mem (fst piece + (n - 1), snd piece - (n - 1)) assoc && 
+                check_pattern piece assoc (n - 1) pattern 
+    | (-1,1) -> mem (fst piece - (n - 1), snd piece + (n - 1)) assoc && 
+                check_pattern piece assoc (n - 1) pattern  
+    | (-1,-1) -> mem (fst piece - (n - 1), snd piece - (n - 1)) assoc && 
+                 check_pattern piece assoc (n - 1) pattern                                        
+    | _ -> true
+  else true
 
-(** [check_horizontal piece assoc n] is the bool of whether there is a horizontal 
+(** [check_vertical piece assoc n] is the bool of whether there is a horizontal 
     of int [n] pieces in assoc that contains [piece]*)
-let check_horizontal piece assoc n = 
+let check_vertical piece assoc n = 
   (* if mem (fst piece +1, snd piece) assoc && 
       mem (fst piece +2, snd piece) assoc && 
       mem (fst piece +3, snd piece) assoc then true else false
   *)
   check_pattern piece assoc n (1,0)
 
-(** [check_vertial piece assoc n] is the bool of whether there is a vertical 
+(** [check_horizontal piece assoc n] is the bool of whether there is a vertical 
     of int [n] pieces in assoc that contains [piece]*)
-let check_vertical piece assoc n = 
+let check_horizontal piece assoc n = 
   (* if mem (fst piece , snd piece +1) assoc && 
       mem (fst piece , snd piece +2) assoc && 
       mem (fst piece , snd piece +3) assoc then true else false
@@ -174,7 +191,7 @@ let rec check_win t n =
   let assoc' = make_assoc color' board 0 in
   let rec check ass = 
     match ass with 
-    | a::b -> 
+    | a :: b -> 
       if check_diagonal a ass n
       || check_vertical a ass n
       || check_horizontal a ass n 
@@ -303,7 +320,6 @@ let score t =
 (* let h_len = find_max_horizontal assoc (t.num_rows) 0 in  *)
 (* failwith "unimplemented" *)
 
-
 (** [rotate st rep] is the state with a board rotated c-clockwise [rep] times. 
     Note: Does not implement chips fallins down. Han just needs this to 
     properly write the [print] function. *)
@@ -331,7 +347,7 @@ let rotate rep st =
 let undo st = 
   match st.prev_state with
   | Some t -> t
-  | None -> failwith "Could not undo further"
+  | None -> raise undo_err
 
 let style_of_color c = 
   match c with 
@@ -343,19 +359,60 @@ let style_of_color c =
   | Cyan -> ANSITerminal.cyan
 
 (** [print_cell] prints the cell according to its color and value. *)
-let print_cell c = 
+let print_cell styles c = 
   match c with 
-  | None -> print_string "( )"
+  | None -> ANSITerminal.(print_string styles "( )") 
   | Some cell -> 
     let style = cell |> get_cell_color |> style_of_color in
     "(" ^ (cell |> get_cell_value |> string_of_int) ^ ")" 
-    |> ANSITerminal.(print_string [style])
+    |> ANSITerminal.(print_string (styles @ [style]))
 
 let print st = 
   let board = st |> rotate 3 |> fun x -> x.board |> map rev in
   print_endline "";
-  let rec loop st =
-    match st with 
+  let rec loop b =
+    match b with 
     | [] -> ()
-    | h :: t -> iter print_cell h; print_string "\n"; loop t
+    | h :: t -> iter (print_cell []) h ; print_string "\n"; loop t
   in loop board 
+
+(** [winning_pieces st c] is the association list of the coordinates of the 
+    winning pieces in [st] of color [c]. 
+    Requires: [check_win st] is [true].  *)
+let winning_pieces st c = 
+  let assoc = make_assoc c st.board 0 in 
+  let pcs_of_pat (r, c) (p1, p2) ass = 
+    if check_pattern (r, c) ass 4 (p1, p2) then [
+      (r, c); 
+      (r + p1, c + p2); 
+      (r + 2 * p1, c + 2 * p2); 
+      (r + 3 * p1, c + 3 * p2);
+    ] else [] in 
+  let rec check_assoc ass acc = 
+    match ass with 
+    | [] -> acc 
+    | (r, c) :: t -> 
+      let pcs = pcs_of_pat (r, c) (0, 1) ass 
+                @ pcs_of_pat (r, c) (1, 0) ass 
+                @ pcs_of_pat (r, c) (1, 1) ass 
+                @ pcs_of_pat (r, c) (1, -1) ass 
+                @ pcs_of_pat (r, c) (-1, 1) ass 
+                @ pcs_of_pat (r, c) (-1, -1) ass in
+      if pcs <> [] then pcs else check_assoc t acc
+  in check_assoc assoc []
+
+let print_win st win_color = 
+  let pcs = winning_pieces st win_color in 
+  let board = st |> rotate 3 |> fun x -> x.board |> map rev in 
+  print_endline "";
+  let rec print_row row (r, c) = 
+    match row with 
+    | [] -> ()
+    | h :: t -> if mem (r, c) pcs 
+      then (print_cell [Bold; Background White] h; print_row t (r, c + 1))
+      else (print_cell [] h; print_row t (r, c + 1)) in
+  let rec print_board b r = 
+    match b with 
+    | [] -> () 
+    | h :: t -> print_row h (r, 0); print_string "\n"; print_board t (r + 1)
+  in print_board board 0

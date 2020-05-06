@@ -14,6 +14,7 @@
 
 val invalid_col_err: exn
 val full_col_err: exn
+val undo_err: exn
 
 (** The colors of the chips and players. *)
 type color = 
@@ -104,3 +105,6 @@ val style_of_color: color -> ANSITerminal.style
 (** [print st] pretty-prints a visual representation of board in state [st] onto
     the command line. *)
 val print: t -> unit
+
+(** [print_win st win_color] does the same thing as [print] but bolds the winning chips. *)
+val print_win: t -> color -> unit

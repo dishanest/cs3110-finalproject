@@ -4,7 +4,6 @@ type command =
   | Insert of int * int
   | Rotate of int
   | Score
-  | Switch
   | Undo 
   | Quit
 

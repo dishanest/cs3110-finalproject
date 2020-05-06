@@ -14,7 +14,6 @@
 
 val invalid_col_err: exn
 val full_col_err: exn
-val undo_err: exn
 
 (** The colors of the chips and players. *)
 type color = 
@@ -51,14 +50,6 @@ val get_current_color: t -> color
 
 val string_of_color: color -> string
 
-(** [check_full t] is a bool of whether the board of the state [t] has every
-    column completely filled with pieces *)
-val check_full: t -> bool 
-
-(** [switch_colors t] is a state with a board identical to that in [t], but 
-    which has each piece's color replaced with the color of the other player*)
-val switch_colors: t -> t
-
 (** [check_win t n] is [BWin]\[RWin] if blue\red has won the game where the 
     condition is to have int [n] pices of their color in a row where the board 
     checked is that of [t] or [NWin] if neither player wins.
@@ -93,7 +84,7 @@ val new_board: int -> int -> 'a option List.t List.t
 val new_state: (color * color) -> int -> int -> t
 
 (** [score t] is the score of the game in its current state. *)
-val score: t -> int
+val score: t -> (int * int)
 
 (** [rotate rep st] is the state that contains the board of [st] rotated [rep]
     times. 
@@ -105,6 +96,3 @@ val style_of_color: color -> ANSITerminal.style
 (** [print st] pretty-prints a visual representation of board in state [st] onto
     the command line. *)
 val print: t -> unit
-
-(** [print_win st win_color] does the same thing as [print] but bolds the winning chips. *)
-val print_win: t -> color -> unit

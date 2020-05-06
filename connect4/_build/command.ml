@@ -2,7 +2,6 @@ type command =
   | Insert of int * int
   | Rotate of int
   | Score 
-  | Switch
   | Undo
   | Quit
 
@@ -34,7 +33,6 @@ let parse str =
   | h :: t -> if h = "quit" && t = [] then Quit
     else if h = "insert" then parse_insert t
     else if h = "undo" && t = [] then Undo
-    else if h = "switch" && t = [] then Switch
     else if h = "rotate" then parse_rotate t
     else if h = "score" && t = [] then Score
     else raise Malformed

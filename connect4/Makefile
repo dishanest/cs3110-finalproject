@@ -1,4 +1,4 @@
-MODULES=state main test author command
+MODULES=state main test author command ai
 OBJECTS=$(MODULES:=.cmo)
 MLS=$(MODULES:=.ml)
 MLIS=$(MODULES:=.mli)

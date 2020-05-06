@@ -1,8 +1,10 @@
 open List
 
+let invalid_dimensions_err = Failure "Invalid dimensions. "
 let invalid_col_err = Failure "Invalid column. "
 let full_col_err = Failure "Column is full. "
 let undo_err = Failure "Cannot undo further. "
+let insert_value_err = Failure "Cannot insert piece of that value. May have already been played. "
 
 type color = 
   | Red
@@ -24,9 +26,8 @@ type cell = {
 type board = cell option list list
 
 type t = {
-  (*  num_cols & num_rows are static - represent dimensions of the board *)
-  num_rows: int;
-  num_cols: int;
+  (*  dimensions are static - (rows, columns) *)
+  dimensions: int * int;
   (* player_colors is static - colors that the players chose at the beginning *)
   player_colors: color * color;
   board: board;
@@ -36,22 +37,6 @@ type t = {
   prev_state: t option;
 } 
 
-(** [check_val_used c v st] is true if the player of color [c] has already 
-    inserted a chip of int [v] in state [st]. *)
-let check_val_used c v st = 
-  let rec check_board b acc = 
-    match b with 
-    | [] -> acc 
-    | h :: t -> 
-      let get_value cell_opt = 
-        match cell_opt with 
-        | Some { color; value } -> 
-          if color = c then value else 0
-        | None -> 0 in
-      let values = map get_value h in
-      check_board t (acc && mem v values) in 
-  check_board st.board true
-
 let get_cell_color c = c.color
 let get_cell_value c = c.value
 
@@ -60,6 +45,8 @@ let get_p1_color st =
 
 let get_p2_color st = 
   let (_, c2) = st.player_colors in c2
+
+let get_dimensions st = st.dimensions
 
 let get_current_color st = st.current_player
 
@@ -96,9 +83,9 @@ let rec check_full st =
   let board = st.board in
   let red_list = make_assoc (get_p1_color st) board 0 in
   let blue_list = make_assoc (get_p2_color st) board 0 in
-  let total_list = red_list@blue_list in 
+  let total_list = red_list @ blue_list in 
   let fill_size = List.length total_list in 
-  let max_size = st.num_cols * st.num_rows in 
+  let max_size = let (c, r) = st.dimensions in c * r in 
   if fill_size < max_size then false else true
 
 (** *)
@@ -213,21 +200,21 @@ let rec new_column len =
 let rec new_board row col = 
   if row = 0 then [] else (new_column col)::(new_board (row-1) col)
 
-let new_state (c1, c2) row col = {
-  num_rows = row; 
-  num_cols = col;
-  player_colors = (c1, c2);
-  board = (new_board col row); 
-  current_player = c1; 
-  score = 0; 
-  prev_state = None
-}
+let new_state (c1, c2) (rows, cols) = 
+  if rows >= 4 && cols >= 4 then {
+    dimensions = (rows, cols);
+    player_colors = (c1, c2);
+    board = (new_board cols rows); 
+    current_player = c1; 
+    score = 0; 
+    prev_state = None
+  } else raise invalid_dimensions_err
 
 (** [push color v lst] is the list [lst] with a cell of color [color] and
     value [v]
     Raises: invalid col failure if the column is full*)
 let rec push color v lst = 
-  let cell = { color = color ; value = v} in
+  let cell = { color = color ; value = v } in
   match lst with
   | None :: (Some a) :: x -> (Some cell) :: (Some a) :: x
   | None :: [] -> (Some cell)::[]
@@ -235,17 +222,37 @@ let rec push color v lst =
   | None :: x -> None :: push color v x
   | [] -> raise full_col_err
 
+(** [check_val_used c v st] is true if the player of color [c] has already 
+    inserted a chip of int [v] in state [st]. *)
+let check_val_used c v st = 
+  let rec check_board b acc = 
+    match b with 
+    | [] -> acc 
+    | h :: t -> 
+      let get_value cell_opt = 
+        match cell_opt with 
+        | Some { color; value } -> 
+          if color = c then value else 0
+        | None -> 0 in
+      let values = map get_value h in
+      check_board t (acc || mem v values) in 
+  check_board st.board false
+
 let rec insert col v st = 
-  let board = st.board in
-  let rec add col board = 
-    match board with 
-    | a :: b -> if col = 0 then (push st.current_player v a) :: b else 
-        a :: add (col - 1) b
-    | [] -> raise invalid_col_err in { 
-    st with 
-    board = add col board; 
-    prev_state = Some st
-  }
+  if v < 0 || v > 9 then raise insert_value_err 
+  else if v <> 0 && check_val_used st.current_player v st 
+  then raise insert_value_err 
+  else 
+    let board = st.board in
+    let rec add col board = 
+      match board with 
+      | a :: b -> if col = 0 then (push st.current_player v a) :: b 
+        else a :: add (col - 1) b
+      | [] -> raise invalid_col_err in { 
+      st with 
+      board = add col board; 
+      prev_state = Some st
+    }
 
 (** [skyfall lst] is list where all None elements are moved to the front and 
     all other options are moved to the bottem in the same order*)
@@ -313,10 +320,10 @@ let score t =
     match ass with 
     | a::b -> 
       if check_vertical a ass n
-      then calculate_score a board n "vertical" + vertical_score b t.num_rows 
+      then calculate_score a board n "vertical" + vertical_score b (fst t.dimensions) 
       else vertical_score ass (n-1)
     | [] -> 0 in
-  let temp =  vertical_score assoc (t.num_rows) in temp
+  let temp =  vertical_score assoc (fst t.dimensions) in temp
 (* let h_len = find_max_horizontal assoc (t.num_rows) 0 in  *)
 (* failwith "unimplemented" *)
 

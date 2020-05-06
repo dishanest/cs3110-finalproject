@@ -39,3 +39,11 @@ let parse str =
     else if h = "score" && t = [] then Score
     else raise Malformed
 
+let string_of_cmd cmd = 
+  match cmd with 
+  | Insert (c, v) -> "insert " ^ string_of_int c ^ " " ^ string_of_int v
+  | Rotate n -> "rotate " ^ string_of_int n
+  | Score -> "score"
+  | Switch -> "switch"
+  | Undo -> "undo"
+  | Quit -> "quit"

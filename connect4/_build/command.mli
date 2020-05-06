@@ -15,3 +15,5 @@ exception Empty
 exception Malformed
 
 val parse : string -> command
+
+val string_of_cmd : command -> string

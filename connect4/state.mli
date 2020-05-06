@@ -1,8 +1,3 @@
-(* Han's Comments: 
-   - When the game begins, size of the board should be at least 4x4
-   - 
-*)
-
 (** Representation of the state of the game. 
 
     This module maintains the data stored in a board, including chip colors,
@@ -12,9 +7,11 @@
 
 *)
 
+val invalid_dimensions_err: exn
 val invalid_col_err: exn
 val full_col_err: exn
 val undo_err: exn
+val insert_value_err: exn
 
 (** The colors of the chips and players. *)
 type color = 
@@ -48,6 +45,7 @@ val get_cell_value: cell -> int
 val get_p1_color: t -> color
 val get_p2_color: t -> color
 val get_current_color: t -> color
+val get_dimensions: t -> (int * int)
 
 val string_of_color: color -> string
 
@@ -89,8 +87,8 @@ val new_board: int -> int -> 'a option List.t List.t
 (** [new_state (c1, c2) row col] creates a new state with an empty board of size 
     [row] by [col] where the players have colors [c1] and [c2] and the starting 
     player has color [c1]. 
-    Requires: [row] and [col] are larger than 0*)
-val new_state: (color * color) -> int -> int -> t
+    Requires: [row] and [col] are larger than 4. *)
+val new_state: (color * color) -> (int * int) -> t
 
 (** [score t] is the score of the game in its current state. *)
 val score: t -> int

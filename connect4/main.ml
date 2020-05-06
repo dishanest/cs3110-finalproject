@@ -220,10 +220,17 @@ and eval_cmd ai_opts st (cmd:command) =
   | RInsert c ->  
     print_string "rinsert";
     if get_gamemode st then 
-      let value = Random.int 10 |> string_of_int in 
-      let new_cmd = "insert "^(string_of_int c)^" "^(value) in 
-      print_string new_cmd;  
-      eval_cmd ai_opts st (Command.parse new_cmd)
+      let v = Random.int 10 in 
+      let new_st = 
+        try insert c v st with exn -> 
+          if exn = State.invalid_col_err then 
+            (print_err invalid_col_err; play ai_opts st)
+          else if exn = State.full_col_err then 
+            (print_err full_col_err; play ai_opts st)
+          else if exn = State.insert_value_err then 
+            (print_err ins_val_err; play ai_opts st)
+          else (print_err invalid_cmd_err; play ai_opts st) in
+      check_win ai_opts new_st
     else (print_err invalid_cmd_err; play ai_opts st)
   | Insert (c, v) -> begin
       let new_st = 

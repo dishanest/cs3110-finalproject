@@ -90,8 +90,9 @@ val new_board: int -> int -> 'a option List.t List.t
     Requires: [row] and [col] are larger than 4. *)
 val new_state: (color * color) -> (int * int) -> t
 
-(** [score t] is the score of the game in its current state. *)
-val score: t -> int
+(** [score st] is the score (s1, s2) of the game in its current state [st], 
+    where s1 is player 1's score and s2 is player 2's score. *)
+val score: t -> (int * int)
 
 (** [rotate rep st] is the state that contains the board of [st] rotated [rep]
     times. 

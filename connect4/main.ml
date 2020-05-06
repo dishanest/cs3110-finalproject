@@ -109,13 +109,13 @@ let undo_err = "Cannot undo without first making a move."
 (** [print_win st c] prints the state [st] and the win message. *)
 let print_win st c = 
   print_win st c;
-  (* TODO: uncomment this when score is done. 
-     let c1 = get_p1_color st in
-     let c2 = get_p2_color st in
-     ANSITerminal.(print_string [style_of_color c1] (string_of_color c1));
-     print_string (": " ^ (st |> score |> string_of_int) ^ "points\n");
-     ANSITerminal.(print_string [style_of_color c2] (string_of_color c2));
-     print_string (": " ^ (st |> score |> string_of_int) ^ "points\n"); *)
+
+  let c1 = get_p1_color st in
+  let c2 = get_p2_color st in
+  ANSITerminal.(print_string [style_of_color c1] (string_of_color c1));
+  print_string (": " ^ (st |> score |> fst |> string_of_int) ^ " points\n");
+  ANSITerminal.(print_string [style_of_color c2] (string_of_color c2));
+  print_string (": " ^ (st |> score |> snd |> string_of_int) ^ " points\n");
   print_string "\nGame over! ";
   ANSITerminal.(print_string[style_of_color c] (string_of_color c));
   print_string " wins!";
@@ -234,7 +234,10 @@ and eval_cmd ai_opts st cmd =
     if num < 1 || num > 3 then 
       (print_err invalid_rot_err; play ai_opts st)
     else let new_st = st |> rotate num |> gravity in check_win ai_opts new_st
-  | Score -> st |> score |> string_of_int |> print_string; play ai_opts st
+  | Score -> let (s1, s2) = st |> score in 
+    print_endline ("Player 1's score: " ^ string_of_int s1); 
+    print_endline ("Player 2's score: " ^ string_of_int s2); 
+    play ai_opts st
   | Switch -> st |> switch_colors |> check_win ai_opts
   | Quit -> ANSITerminal.(print_string[green] "Bye-bye!\n"); exit 0
 

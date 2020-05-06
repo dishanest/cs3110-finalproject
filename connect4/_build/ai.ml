@@ -8,8 +8,8 @@ type difficulty =
   | Easy 
   | Hard
 
-(** [easy_response st] is a relatively unintelligent and random response 
-    built from little contextual understanding of the board. *)
+(** [easy_response st] is an unintelligent and random response built using 
+    little contextual understanding of the board. Only returns insert. *)
 let rec easy_response st : response = 
   self_init ();
   let (num_cols, _) = get_dimensions st in

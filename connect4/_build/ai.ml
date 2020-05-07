@@ -79,13 +79,13 @@ let score_horizontal a assoc1 assoc2 bool=
     match (score_pattern a assoc1 assoc2 3 (1,0) 3) with 
     | DNE -> 0
     | Exists -> if bool then 2000 else 150
-    | Blocked -> print_string "blocked" ; 0
+    | Blocked -> 0
   in
   let three' =
     match (score_pattern a assoc1 assoc2 3 (-1,0) 3) with 
     | DNE -> 0
     | Exists -> if bool then 2000 else 150
-    | Blocked -> print_string "blocked" ; 0
+    | Blocked ->  0
   in
   let two =
     match (score_pattern a assoc1 assoc2 2 (1,0) 2) with 
@@ -271,7 +271,7 @@ let hard_response st =
     |[] -> (x,y)
   in 
   print_string (test_list board_list);
-  let chosen = best_board board_list (-4,st |> insert 0 0) in 
+  let chosen = best_board board_list (-4,try (st |> insert 0 0) with | Failure a -> st) in 
   match chosen with
   | (a,_) -> if a= -4 then Insert (cols/2, 0) else if a = -1 then Rotate 1 else if a = -2 
     then Rotate 2 else if a = -3 then Rotate 3 else Insert (a, 0)

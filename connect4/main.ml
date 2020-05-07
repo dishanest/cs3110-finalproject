@@ -130,6 +130,7 @@ let print_win st c =
 (** [print_tie st] prints the state [st] and the tie message. *)
 let print_tie st = 
   print st;
+  print_col_nums st;
   let c1 = get_p1_color st in 
   let c2 = get_p2_color st in
   print_newline ();
@@ -190,6 +191,7 @@ let rec play (ai1_opt, ai2_opt) st : State.t =
   (* end game and print tie message if board is full. *)
   if check_full st then (print_tie st; exit 0) else
     print st;
+  print_col_nums st;
   (* check and assign AI on this turn *)
   let current_player = get_current_color st in 
   let is_ai ai_opt = 
@@ -289,7 +291,7 @@ let rec dimensions_repl () : (int * int) = begin
   print_string dimensions_prompt;
   print_string input_prompt;
   match read_line () |> lowercase_ascii |> trim |> split_on_char ' ' with 
-  | e :: [] -> if e = "" then (6, 7) else (print_err invalid_cmd_err; dimensions_repl ())
+  | e :: [] -> if e = "" then (6, 6) else (print_err invalid_cmd_err; dimensions_repl ())
   | r :: c :: [] -> 
     let num_rows = int_of_string r in 
     let num_cols = int_of_string c in
@@ -364,8 +366,8 @@ let intro_repl () =
   start_game (dimensions_repl ()) (c1, c2) (ai1_opt, ai2_opt) random
 
 let main () =
-  (* TODO: uncomment this. 
-     print_loadup Red Blue; *)
+  (* TODO: uncomment this. *)
+  print_loadup Red Blue; 
   print_welcome ();
   print_instructions ();
   intro_repl ()

@@ -42,6 +42,7 @@ val get_cell_color: cell -> color
 (** [get_cell_value c] is the integer point-value of cell [c]. *)
 val get_cell_value: cell -> int
 
+val get_board: t -> board
 val get_p1_color: t -> color
 val get_p2_color: t -> color
 val get_current_color: t -> color
@@ -57,6 +58,12 @@ val check_full: t -> bool
 (** [switch_colors t] is a state with a board identical to that in [t], but 
     which has each piece's color replaced with the color of the other player*)
 val switch_colors: t -> t
+
+
+(** [make_assoc color board col] is an association list from an int r to an int
+    c where r is the row and c is the column of all cells of 
+    color [color] in [t] Requires: col begins at 0*)
+val make_assoc: color -> board -> int -> (int*int)list
 
 (** [check_win t n] is [BWin]\[RWin] if blue\red has won the game where the 
     condition is to have int [n] pices of their color in a row where the board 
@@ -105,6 +112,10 @@ val style_of_color: color -> ANSITerminal.style
 (** [print st] pretty-prints a visual representation of board in state [st] onto
     the command line. *)
 val print: t -> unit
+
+(** [print_col_nums st] prints the number of each column below it for the board 
+    in state [st]*)
+val print_col_nums: t -> unit
 
 (** [print_win st win_color] does the same thing as [print] but bolds the winning chips. *)
 val print_win: t -> color -> unit

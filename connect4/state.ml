@@ -49,6 +49,8 @@ let get_p2_color st =
 
 let get_dimensions st = st.dimensions
 
+let get_board st = st.board
+
 let get_current_color st = st.current_player
 
 let get_gamemode st = st.random 
@@ -328,6 +330,16 @@ let print_cell styles c =
     "(" ^ (cell |> get_cell_value |> string_of_int) ^ ")" 
     |> ANSITerminal.(print_string (styles @ [style]))
 
+
+let print_col_nums st =
+  let cols = snd (st.dimensions) in 
+  let rec loop cols acc= 
+    if acc > cols -1 then (print_string "";) else
+      (print_string (" "^ string_of_int acc ^ " ");
+       loop cols (acc+1); )
+  in loop cols 0
+
+
 let print st = 
   let board = st |> rotate 3 |> fun x -> x.board |> map rev in
   print_endline "";
@@ -335,7 +347,7 @@ let print st =
     match b with 
     | [] -> ()
     | h :: t -> iter (print_cell []) h ; print_string "\n"; loop t
-  in loop board 
+  in loop board
 
 (** [winning_pieces st c] is the association list of the coordinates of the 
     winning pieces in [st] of color [c]. 

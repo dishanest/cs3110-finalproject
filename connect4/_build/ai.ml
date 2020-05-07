@@ -66,14 +66,14 @@ let score_horizontal a assoc1 assoc2 bool=
   let four =
     match (score_pattern a assoc1 assoc2 4 (1,0) 4) with 
     | DNE -> 0
-    | Exists -> 4000
-    | Blocked -> 4000
+    | Exists ->  100000
+    | Blocked -> 100000
   in
   let four' =
     match (score_pattern a assoc1 assoc2 4 (-1,0) 4) with 
     | DNE -> 0
-    | Exists -> 4000
-    | Blocked -> 4000
+    | Exists ->  100000
+    | Blocked -> 100000
   in
   let three =
     match (score_pattern a assoc1 assoc2 3 (1,0) 3) with 
@@ -105,14 +105,14 @@ let score_vertical a assoc1 assoc2 bool=
   let four =
     match (score_pattern a assoc1 assoc2 4 (0,1) 4) with 
     | DNE -> 0
-    | Exists -> 4000
-    | Blocked -> 4000
+    | Exists -> 100000
+    | Blocked -> 100000
   in
   let four' =
     match (score_pattern a assoc1 assoc2 4 (0,-1) 4) with 
     | DNE -> 0
-    | Exists -> 4000
-    | Blocked -> 4000
+    | Exists ->100000
+    | Blocked -> 100000
   in
   let three =
     match (score_pattern a assoc1 assoc2 3 (0,1) 3) with 
@@ -146,26 +146,26 @@ let score_diagonal a assoc1 assoc2 bool=
   let four =
     match (score_pattern a assoc1 assoc2 4 (1,1) 4) with 
     | DNE -> 0
-    | Exists -> 4000
-    | Blocked -> 4000
+    | Exists ->  100000
+    | Blocked ->  100000
   in
   let four1 =
     match (score_pattern a assoc1 assoc2 4 (1,-1) 4) with 
     | DNE -> 0
-    | Exists -> 4000
-    | Blocked -> 4000
+    | Exists ->  100000
+    | Blocked ->  100000
   in
   let four2 =
     match (score_pattern a assoc1 assoc2 4 (-1,1) 4) with 
     | DNE -> 0
-    | Exists -> 4000
-    | Blocked -> 4000
+    | Exists ->  100000
+    | Blocked ->  100000
   in
   let four3 =
     match (score_pattern a assoc1 assoc2 4 (-1,-1) 4) with 
     | DNE -> 0
-    | Exists -> 4000
-    | Blocked -> 4000
+    | Exists ->  100000
+    | Blocked ->  100000
   in
   let three =
     match (score_pattern a assoc1 assoc2 3 (1,1) 3) with 

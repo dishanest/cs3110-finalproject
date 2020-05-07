@@ -366,8 +366,8 @@ let intro_repl () =
   start_game (dimensions_repl ()) (c1, c2) (ai1_opt, ai2_opt) random
 
 let main () =
-  (* TODO: uncomment this. *)
-  print_loadup Red Blue; 
+  (* TODO: uncomment this. 
+     print_loadup Red Blue; *)
   print_welcome ();
   print_instructions ();
   intro_repl ()

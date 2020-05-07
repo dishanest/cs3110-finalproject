@@ -50,7 +50,7 @@ let rec score_pattern piece assoc1 assoc2 n pattern nog=
     | (0,1) -> if (mem (fst piece , snd piece + nog) assoc2) = false
       then Exists else Blocked
     | (0,-1) -> if (mem (fst piece , snd piece - nog) assoc2) = false
-      then Exists else Blocked
+      then  Exists else Blocked
     | (1,1) -> if(mem (fst piece + nog, snd piece + nog) assoc2) = false
       then Exists else Blocked
     | (1,-1) -> if(mem (fst piece + nog, snd piece - nog) assoc2)= false
@@ -60,6 +60,7 @@ let rec score_pattern piece assoc1 assoc2 n pattern nog=
     | (-1,-1) -> if(mem (fst piece - nog, snd piece - nog) assoc2)=false
       then Exists else Blocked                                       
     | _ -> failwith "no pattern"
+
 
 
 let score_horizontal a assoc1 assoc2 bool= 
@@ -271,7 +272,7 @@ let hard_response st =
     |[] -> (x,y)
   in 
   print_string (test_list ((-4,try (st |> insert (cols/2) 0) with | Failure a -> st)::board_list));
-  let chosen = best_board board_list (-4,try (st |> insert 0 0) with | Failure a -> st) in 
+  let chosen = best_board board_list (-4,try (st |> insert (cols/2) 0) with | Failure a -> st) in 
   match chosen with
   | (a,_) -> if a= -4 then Insert (cols/2, 0) else if a = -1 then Rotate 1 else if a = -2 
     then Rotate 2 else if a = -3 then Rotate 3 else Insert (a, 0)

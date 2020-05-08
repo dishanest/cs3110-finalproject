@@ -230,18 +230,26 @@ let rec push color v lst =
 (** [check_val_used c v st] is true if the player of color [c] has already 
     inserted a chip of int [v] in state [st]. *)
 let check_val_used c v st = 
-  let rec check_board b acc = 
-    match b with 
-    | [] -> acc 
-    | h :: t -> 
-      let get_value cell_opt = 
-        match cell_opt with 
-        | Some { color; value } -> 
-          if color = c then value else 0
-        | None -> 0 in
-      let values = map get_value h in
-      check_board t (acc || mem v values) in 
-  check_board st.board false
+  if v = 0 then false 
+  else
+    let rec check_board b acc = 
+      match b with 
+      | [] -> acc 
+      | h :: t -> 
+        let get_value cell_opt = 
+          match cell_opt with 
+          | Some { color; value } -> 
+            if color = c then value else 0
+          | None -> 0 in
+        let values = map get_value h in
+        check_board t (acc || mem v values) in 
+    check_board st.board false
+
+let rec get_valid_int c st = 
+  let v = Random.int 10 in 
+  print_int v; print_string "\n";
+  if (check_val_used c v st) then get_valid_int c st 
+  else v
 
 let rec insert col v st = 
   if v < 0 || v > 9 then raise insert_value_err 
@@ -482,5 +490,3 @@ let score t =
   let h2 = horizontal_score assoc' (snd t.dimensions) in 
   (* let d1 = diagonal_score assoc (t.num_cols) in  *)
   (v1+h1, v2+h2)
-(* let h_len = find_max_horizontal assoc (t.num_rows) 0 in  *)
-(* failwith "unimplemented" *)

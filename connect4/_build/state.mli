@@ -71,6 +71,12 @@ val make_assoc: color -> board -> int -> (int*int)list
     Requires: [n] is larger than 2 (for a real game) *)
 val check_win: t -> int -> win
 
+(** [check_val_used c v st] is true if the player of color [c] has already 
+    inserted a chip of int [v] in state [st]. *)
+val check_val_used: color -> int -> t -> bool
+
+(** [get_valid_int c st] is a valid int the player of color [c] can insert*)
+val get_valid_int: color -> t -> int
 (** [insert col v t] inserts a chip with value [v] in column [col] of the board
     in state [t] where color is of the player whose turn it is in [t]
     Precondition: [col] is a valid column and [v] is an in between 0..9

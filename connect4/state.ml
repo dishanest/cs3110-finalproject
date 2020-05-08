@@ -35,6 +35,7 @@ type t = {
   current_player: color;
   score: int;
   prev_state: t option;
+  (* random is true if gamemode is random *)
   random: bool;
 } 
 

@@ -234,7 +234,13 @@ and eval_cmd ai_opts st (cmd:command) =
       check_win ai_opts new_st
     else (print_err invalid_cmd_err; play ai_opts st)
   | Insert (c, v) -> begin
-      if get_gamemode st then 
+      (*curr_ai is true if current player is an AI  *)
+      let curr_ai = 
+        match ai_opts with 
+        | (None, Some v) -> (get_p2_color st = get_current_color st)
+        | (Some v, None) -> (get_p1_color st = get_current_color st)
+        | _ -> false in 
+      if (not curr_ai && get_gamemode st) then 
         (print_err invalid_cmd_err; play ai_opts st)
       else
         let new_st = 

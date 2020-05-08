@@ -399,7 +399,7 @@ let print_win st win_color =
     | h :: t -> print_row h (r, 0); print_string "\n"; print_board t (r + 1)
   in print_board board 0
 
-
+(** [score_cell_helper y lst] returns the [y]th value in [lst] *)
 let rec score_cell_helper y lst = 
   match lst with 
   | [] ->  0
@@ -420,37 +420,80 @@ let rec score_cell_value x y (board: cell option List.t List.t) : int =
 
 (**[calculate_score piece board n pattern] is the sum of [n] pieces on the [board]
    starting at [piece] in [pattern] *)
-let rec calculate_score piece board n pattern = 
+let rec calculate_score piece board n pattern direction = 
   match pattern with 
   | "vertical" -> 
     if n = 0 then 0 
     else 
       let score = score_cell_value (snd piece) (fst piece) board in 
-      score + calculate_score (fst piece, snd piece+1) board (n-1) pattern  
+      score + calculate_score (fst piece, snd piece+1) board (n-1) pattern direction
   | "horizontal" -> 
     if n = 0 then 0 
     else 
       let score = score_cell_value (snd piece) (fst piece) board in 
-      score + calculate_score (fst piece+1, snd piece) board (n-1) pattern  
+      score + calculate_score (fst piece+1, snd piece) board (n-1) pattern direction
+  | "diagonal" -> 
+    if n = 0 then 0 
+    else
+      let score = score_cell_value (snd piece) (fst piece) board in 
+      score + calculate_score (fst piece + fst direction, snd piece + snd direction) board (n-1) pattern direction
   | _ -> failwith "invalid pattern"
 
-let rec update_assoc ass cons pattern = 
+let rec update_assoc ass cons pattern (direction: int * int) piece = 
+  (* print_string "piece: "; print_int (fst piece); print_int (snd piece); print_string "\n"; *)
   match pattern with 
   | "vertical" -> begin
       match ass with 
       | [] -> [] 
       | h::t -> if (fst h) = cons then 
-          update_assoc t cons pattern 
-        else h::(update_assoc t cons pattern)
+          update_assoc t cons pattern direction piece
+        else h::(update_assoc t cons pattern direction piece)
     end
   | "horizontal" -> begin
       match ass with 
       | [] -> []
       | h::t -> if (snd h) = cons then 
-          update_assoc t cons pattern 
-        else h::(update_assoc t cons pattern)
+          update_assoc t cons pattern direction piece
+        else h::(update_assoc t cons pattern direction piece)
+    end
+  | "diagonal" -> begin 
+      (* print_string "direction: "; print_int (fst direction); print_int (snd direction); print_string "\n"; *)
+      match ass with 
+      | [] -> []
+      | h::t -> if fst h = fst piece && snd h = snd piece then 
+          update_assoc t cons pattern direction (fst piece - fst direction, snd piece - snd direction)
+        else h::(update_assoc t cons pattern direction piece)
     end
   | _ -> failwith "invalid pattern"
+
+let rec print_assoc assoc = 
+  match assoc with 
+  | [] -> print_string"";
+  | h::t -> print_int (fst h); print_string " "; print_int (snd h); print_string "\n";
+    print_assoc t
+
+(* let rec diagonal_direction_helper assoc piece= 
+   print_int (fst piece); print_int(snd piece);print_string "\n";
+   match assoc with 
+   | [] -> 0 
+   | h::t -> if (fst h=fst piece && snd h=snd piece) then 
+      1 + diagonal_direction_helper t ((fst h)+1, (snd h)-1)
+    else 
+      diagonal_direction_helper t piece
+
+   let diagonal_direction assoc n piece = 
+   print_string "n: "; print_int n; print_string "\n";
+   print_string "assoc: "; print_assoc assoc;
+   if (diagonal_direction_helper assoc piece) = n 
+   then "right"
+   else "left" *)
+
+let diagonal_score_helper piece assoc n = 
+  if check_pattern piece assoc n (1,1) then (1,1)
+  else if check_pattern piece assoc n (1,-1) then (1,-1)
+  else if check_pattern piece assoc n (-1,1) then (-1,1)
+  else if check_pattern piece assoc n (-1,-1) then (-1,-1)
+  else (0,0)
 
 let score t = 
   let board = t |> rotate 3 |> fun x -> x.board |> map rev in
@@ -462,8 +505,8 @@ let score t =
     | a::b -> 
       if check_vertical a ass n
       then 
-        let x = calculate_score a board n "vertical" in 
-        let new_ass = update_assoc ass (fst a) "vertical" in
+        let x = calculate_score a board n "vertical" (0,0) in 
+        let new_ass = update_assoc ass (fst a) "vertical" (0,0) (0,0) in
         (* print_int n; print_string "\n"; *)
         if x = 10 
         then 10 + vertical_score new_ass (fst t.dimensions)
@@ -476,18 +519,37 @@ let score t =
     | a::b -> 
       if check_horizontal a ass n
       then 
-        let x = calculate_score a board n "horizontal" in 
-        let new_ass = update_assoc ass (snd a) "horizontal" in
-        (* print_int x; print_string "\n"; *)
+        let x = calculate_score a board n "horizontal" (0,0) in 
+        let new_ass = update_assoc ass (snd a) "horizontal" (0,0) (0,0) in
         if x = 10 
         then 10 + horizontal_score new_ass (snd t.dimensions)
         else 
           horizontal_score new_ass (snd t.dimensions)
       else horizontal_score ass (n-1)
     | [] -> 0 in
-  let v1 =  vertical_score assoc (fst t.dimensions) in 
-  let h1 = horizontal_score assoc (snd t.dimensions) in 
-  let v2 =  vertical_score assoc' (fst t.dimensions) in 
-  let h2 = horizontal_score assoc' (snd t.dimensions) in 
-  (* let d1 = diagonal_score assoc (t.num_cols) in  *)
-  (v1+h1, v2+h2)
+  let rec diagonal_score ass n : int = 
+    if n = 1 then 0 
+    else
+      match ass with 
+      | a::b -> 
+        let direction = diagonal_score_helper a ass n in
+        if direction = (0,0) then 
+          diagonal_score ass (n-1)
+        else 
+          let x = calculate_score a board n "diagonal" direction in 
+          let new_ass = update_assoc ass n "diagonal" direction a in
+          (* print_string "new assoc: "; print_assoc new_ass; print_string "\n"; *)
+          (* print_int x; print_string "\n"; *)
+          if x = 10 
+          then 10 + diagonal_score new_ass (snd t.dimensions)
+          else 
+            diagonal_score new_ass (snd t.dimensions)
+      | [] -> 0 in
+
+  (* let v1 =  vertical_score assoc (fst t.dimensions) in 
+     let h1 = horizontal_score assoc (snd t.dimensions) in 
+     let v2 =  vertical_score assoc' (fst t.dimensions) in 
+     let h2 = horizontal_score assoc' (snd t.dimensions) in  *)
+  let d1 = diagonal_score assoc (fst t.dimensions) in 
+  (* (v1+h1, v2+h2) *)
+  (d1,0)

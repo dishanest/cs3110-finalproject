@@ -269,8 +269,17 @@ and eval_cmd ai_opts st (cmd:command) =
       (print_err invalid_rot_err; play ai_opts st)
     else let new_st = st |> rotate num |> gravity in check_win ai_opts new_st
   | Score -> let (s1, s2) = st |> score in 
-    print_endline ("Player 1's score: " ^ string_of_int s1); 
-    print_endline ("Player 2's score: " ^ string_of_int s2); 
+    let c1 = get_p1_color st in
+    let c2 = get_p2_color st in
+    ANSITerminal.(print_string [style_of_color c1] (string_of_color c1 ^ "\'s "));
+    print_string "score: ";
+    ANSITerminal.(print_string [style_of_color c1] (string_of_int s1));
+    print_string "\n";
+    ANSITerminal.(print_string [style_of_color c2] (string_of_color c2 ^ "\'s "));
+    print_string "score : ";
+    ANSITerminal.(print_string [style_of_color c2] (string_of_int s1));
+    print_string "\n";
+
     play ai_opts st
   | Switch -> st |> switch_colors |> check_win ai_opts
   | Quit -> ANSITerminal.(print_string[green] "Bye-bye!\n"); exit 0

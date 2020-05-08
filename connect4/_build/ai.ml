@@ -18,9 +18,17 @@ let rec easy_response st : response =
   let random_val = Random.int 10 in
   Insert (random_col, random_val)
 
+(** [chain] is the type of a chain of pieces in a board*)
 type chain = |Exists | Blocked | DNE
 
-
+(** [score_pattern piece assoc1 assoc2 n pattern nog] is a chain that represents
+    the position of pieces starting at position [piece] and moving in a 
+    direction determined by [pattern] for a makimum length of [nog]. The chain
+    returned is [Exists] if there are [nog] pieces in the [pattern] in the list 
+    of piece positions [assoc1] without any piece form list [assoc2] at the end,
+    the case of which returns [blocked] instead, or [DNE] if the specified
+    length of pieces did not exist in the first place
+    Requires: [n] is equal to [nog] when run*)
 let rec score_pattern piece assoc1 assoc2 n pattern nog= 
   if n > 0 then 
     match pattern with
@@ -63,6 +71,11 @@ let rec score_pattern piece assoc1 assoc2 n pattern nog=
 
 
 
+(** [score_horizontal a assoc1 assoc2 bool] returns an int for the horizontal 
+    score of a board from a board space touple [a] where [bool] is whether it is
+    the non-AI player's turn, and [assoc1] is a list of board position touples 
+    for current player and [assoc2] is a list of board position touples for the 
+    opposing player*)
 let score_horizontal a assoc1 assoc2 bool= 
   let four =
     match (score_pattern a assoc1 assoc2 4 (1,0) 4) with 
@@ -101,6 +114,13 @@ let score_horizontal a assoc1 assoc2 bool=
     | Blocked -> 0
   in
   four + four' + three + three' + two + two' 
+
+
+(** [score_vertical a assoc1 assoc2 bool] returns an int for the vertical score 
+    of a board from a board space touple [a] where [bool] is whether it is the 
+    non-AI player's turn, and [assoc1] is a list of board position touples for 
+    current player and [assoc2] is a list of board position touples for the 
+    opposing player*)
 
 let score_vertical a assoc1 assoc2 bool= 
   let four =
@@ -142,7 +162,11 @@ let score_vertical a assoc1 assoc2 bool=
   four + four' + three + three' + two + two'
 
 
-
+(** [score_diagonal a assoc1 assoc2 bool] returns an int for the diagonal score 
+    of a board from a board space touple [a] where [bool] is whether it is the 
+    non-AI player's turn, and [assoc1] is a list of board position touples for 
+    current player and [assoc2] is a list of board position touples for the 
+    opposing player*)
 let score_diagonal a assoc1 assoc2 bool= 
   let four =
     match (score_pattern a assoc1 assoc2 4 (1,1) 4) with 
@@ -219,7 +243,7 @@ let score_diagonal a assoc1 assoc2 bool=
   four + four1 + four2 +four3 + three +three1 
   +three2 +three3 +two +two1 +two2 +two3
 
-(** [ai_score st] gives a numeric score to the favorability of the board [st]*)
+(** [ai_score st] gives a numeric score to the favorability of the board in state [st]*)
 let ai_score st = 
   let score = 0 in
   let board = get_board st in 
@@ -240,13 +264,13 @@ let ai_score st =
      calc bad_assoc score bad_assoc good_assoc true
 
 
-
+(** [test_list lst] creates a string out of the association list [lst] for testing*)
 let rec test_list lst = 
   match lst with
   |(a,b)::c -> " "^ string_of_int a ^ ":" ^ string_of_int (ai_score b)^ test_list c
   | [] -> ""
 
-
+(** [hard_response st] returns an command based on an evaluation of all possible insertion and rotation commands in state [st]*)
 (** How AI hard will work: takes in a board state and makes a new temporary 
     board for all possible insertions/rotations. Then a board score function 
     will be called that gives each board after the move a score. Finally, the 

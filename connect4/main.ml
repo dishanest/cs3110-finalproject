@@ -91,10 +91,14 @@ let print_instructions () =
 
 |}
 
-let print_cmd_prompt c = 
+let print_cmd_prompt c st = 
   print_string "\nIt\'s ";
   ANSITerminal.(print_string [style_of_color c] (string_of_color c ^ "\'s "));
-  print_string {|turn. Make your move: "insert [column] [value]", "rotate [num]", "switch", "score", "undo", "quit".
+  if get_gamemode st then 
+    print_string {|turn. Make your move: "insert [column]", "rotate [num]", "switch", "score", "undo", "quit".
+|}
+  else
+    print_string {|turn. Make your move: "insert [column] [value]", "rotate [num]", "switch", "score", "undo", "quit".
 |}
 
 let print_err err_str = 
@@ -203,7 +207,7 @@ let rec play (ai1_opt, ai2_opt) st : State.t =
     else if (current_player = get_p2_color st && is_ai ai2_opt) then ai2_opt 
     else None in
   try begin 
-    print_cmd_prompt (get_current_color st); 
+    print_cmd_prompt (get_current_color st) st; 
     let cmd = 
       match current_cpu with 
       | None -> print_string input_prompt; Command.parse (read_line ())

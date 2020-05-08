@@ -32,8 +32,8 @@ let print_welcome () =
   print_string "~~~ \n\nFor the best experience, adjust your terminal to show 22 lines. \n\n"
 
 let dimensions_prompt = {|
-Press enter to play on the classic 6 x 7 board. 
-Else type "[rows] [columns]" with each dimension between 0 and 50.
+Press enter to play on the classic 6 x 6 board. 
+Else type "[rows]" with each dimension between 0 and 50.
 |}
 
 let print_colors_prompt () = 
@@ -303,13 +303,12 @@ let rec dimensions_repl () : (int * int) = begin
   print_string dimensions_prompt;
   print_string input_prompt;
   match read_line () |> lowercase_ascii |> trim |> split_on_char ' ' with 
-  | e :: [] -> if e = "" then (6, 6) else (print_err invalid_cmd_err; dimensions_repl ())
-  | r :: c :: [] -> 
-    let num_rows = int_of_string r in 
-    let num_cols = int_of_string c in
-    if num_rows < 4 || num_cols < 4 
-    then (print_err invalid_dims_err; dimensions_repl ())
-    else (int_of_string r, int_of_string c)
+  | e :: [] -> if e = "" then (6, 6) 
+    else 
+      let num_rows = int_of_string e in
+      if num_rows < 4 
+      then (print_err invalid_dims_err; dimensions_repl ())
+      else (num_rows, num_rows)
   | _ -> print_err invalid_cmd_err; dimensions_repl () 
 end
 

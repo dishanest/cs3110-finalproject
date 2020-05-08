@@ -261,7 +261,7 @@ let hard_response st =
                    (-1,rotate_1)::board_list in 
   let rec insert_maker cols board_list = 
     if cols < 0 then board_list else
-      try (insert_maker (cols-1) ((cols, st |> insert cols 0)::board_list)) with
+      try (insert_maker (cols-1) ((cols, st |> insert cols (get_valid_int (get_current_color st) st))::board_list)) with
       |Failure a -> insert_maker (cols-1) board_list
   in
   let board_list = insert_maker (cols-1) board_list in
@@ -271,11 +271,11 @@ let hard_response st =
         best_board c (x,y)
     |[] -> (x,y)
   in 
-  print_string (test_list ((-4,try (st |> insert (cols/2) 0) with | Failure a -> st)::board_list));
-  let chosen = best_board board_list (-4,try (st |> insert (cols/2) 0) with | Failure a -> st) in 
+  print_string (test_list ((-4,try (st |> insert (cols/2) (get_valid_int (get_current_color st) st)) with | Failure a -> st)::board_list));
+  let chosen = best_board board_list (-4,try (st |> insert (cols/2) (get_valid_int (get_current_color st) st)) with | Failure a -> st) in 
   match chosen with
-  | (a,_) -> if a= -4 then Insert (cols/2, 0) else if a = -1 then Rotate 1 else if a = -2 
-    then Rotate 2 else if a = -3 then Rotate 3 else Insert (a, 0)
+  | (a,_) -> if a= -4 then Insert (cols/2, (get_valid_int (get_current_color st) st)) else if a = -1 then Rotate 1 else if a = -2 
+    then Rotate 2 else if a = -3 then Rotate 3 else Insert (a, (get_valid_int (get_current_color st) st))
 
 
 

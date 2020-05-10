@@ -15,6 +15,11 @@ ocamlfind ocamlc -c -package oUnit -package ANSITerminal -o state.cmi state.mli 
 ocamlfind ocamlc -c -package oUnit -package ANSITerminal -o ai.cmi ai.mli # cached
 # Target: main.cmo, tags: { package(ANSITerminal), package(oUnit), byte, compile, extension:cmo, extension:ml, file:main.cmo, file:main.ml, implem, ocaml, quiet, traverse }
 ocamlfind ocamlc -c -package oUnit -package ANSITerminal -o main.cmo main.ml
++ ocamlfind ocamlc -c -package oUnit -package ANSITerminal -o main.cmo main.ml
+File "main.ml", line 218, characters 25-37:
+218 |   if check_full st then (print_tie st; exit 0) else print st;
+                               ^^^^^^^^^^^^
+Warning 21: this statement never returns (or has an unsound type.)
 # Target: ai.ml.depends, tags: { package(ANSITerminal), package(oUnit), extension:ml, file:ai.ml, ocaml, ocamldep, quiet, traverse }
 ocamlfind ocamldep -package oUnit -package ANSITerminal -modules ai.ml > ai.ml.depends # cached
 # Target: ai.cmo, tags: { package(ANSITerminal), package(oUnit), byte, compile, extension:cmo, extension:ml, file:ai.cmo, file:ai.ml, implem, ocaml, quiet, traverse }

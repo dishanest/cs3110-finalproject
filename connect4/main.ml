@@ -118,6 +118,24 @@ let undo_err = "Cannot undo without first making a move."
 
 (****************** End string resources for Main ******************)
 
+(** [print_tie st] prints the state [st] and the tie message. *)
+let print_tie st = 
+  print st;
+  print_col_nums st;
+  let c1 = get_p1_color st in 
+  let c2 = get_p2_color st in
+  print_newline ();
+  ANSITerminal.(print_string[style_of_color (c1)] "GAME");
+  print_newline ();
+  ANSITerminal.(print_string[style_of_color (c2)] "OVER");
+  print_newline ();
+  ANSITerminal.(print_string [style_of_color (c1)] (string_of_color c1));
+  print_string (" and ");
+  ANSITerminal.(print_string [style_of_color (c2)] (string_of_color c2));
+  print_string (" TIE! ");
+  print_newline ();
+  exit 0
+
 (** [print_win st c] prints the state [st] and the win message. *)
 let print_win st c = 
   print_win st c;
@@ -135,31 +153,16 @@ let print_win st c =
   ANSITerminal.(print_string [style_of_color c2] (string_of_color c2 ^ "\'s "));
   print_string "score : ";
   ANSITerminal.(print_string [style_of_color c2] (string_of_int s2 ^ "\n"));
-  print_string "\nGame over! ";
-  let win_c = if s1 > s2 then c1
-    else c2 in 
-  ANSITerminal.(print_string[style_of_color win_c] (string_of_color win_c));
+  if s1 = s2 then print_tie st 
+  else
+    let win_c = if s1 > s2 then c1
+      else c2 in 
+    print_string "\nGame over! ";
+    ANSITerminal.(print_string[style_of_color win_c] (string_of_color win_c));
 
-  print_string " wins!";
-  print_newline ();
-  exit 0
-
-(** [print_tie st] prints the state [st] and the tie message. *)
-let print_tie st = 
-  print st;
-  print_col_nums st;
-  let c1 = get_p1_color st in 
-  let c2 = get_p2_color st in
-  print_newline ();
-  ANSITerminal.(print_string[style_of_color (c1)] "GAME");
-  print_newline ();
-  ANSITerminal.(print_string[style_of_color (c2)] "OVER");
-  print_newline ();
-  ANSITerminal.(print_string [style_of_color (c1)] (string_of_color c1));
-  print_string (" and ");
-  ANSITerminal.(print_string [style_of_color (c2)] (string_of_color c2));
-  print_string (" TIE! ");
-  print_newline ()
+    print_string " wins!";
+    print_newline ();
+    exit 0
 
 (** [stall t] waits [t] seconds before proceeding to the next expression. *)
 let stall time = ignore (Unix.select [] [] [] time)

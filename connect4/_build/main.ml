@@ -136,7 +136,10 @@ let print_win st c =
   print_string "score : ";
   ANSITerminal.(print_string [style_of_color c2] (string_of_int s2 ^ "\n"));
   print_string "\nGame over! ";
-  ANSITerminal.(print_string[style_of_color c] (string_of_color c));
+  let win_c = if s1 > s2 then c1
+    else c2 in 
+  ANSITerminal.(print_string[style_of_color win_c] (string_of_color win_c));
+
   print_string " wins!";
   print_newline ();
   exit 0

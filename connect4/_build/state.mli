@@ -114,7 +114,7 @@ val tick_turn: t -> t
 (** [undo t] returns the last state before an alteration such as an insertion 
     or a rotation. 
     Raises: [undo_err] failure if undo is called on a new state*)
-val undo: t-> t
+val undo: t -> t
 
 (** [new_state (c1, c2) row col] creates a new state with an empty board of size 
     [row] by [col] where the players have colors [c1] and [c2] and the starting 

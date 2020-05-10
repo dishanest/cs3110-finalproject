@@ -33,7 +33,7 @@ System Testing (TODO)
   - [check_full]: a full board is true and all non-full boards are false. 
   - [switch_colors]: all Red chips in st are Blue in st' and all Blue chips in 
     st are Red in st'. Tested on partially filled board and full board. 
-  - [make_assoc]: full board with 
+  - [make_assoc]:
   - [check_win]:
   - [check_val_used]:
   - [get_valid_int]: this function produces a random value that cannot equal a 

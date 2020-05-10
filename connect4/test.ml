@@ -21,27 +21,52 @@ Summary
   provide a suitable challenge to human players.
 
 System Testing (TODO)
-  Black box tests
-  Verifying interface specifications
-  Black box play tests for each instance of the REPL - empty string, keyword without parameters, keyword with extra parameters, mispelled keyword, nonsensical command, 
-
   The correctness of the system is demonstrated by the correctness of every 
-  function defined within the State interface. The [get_], [_of_], and functions are simple and 
-  thus did not require much testing. We tested every path of output for all other functions, 
-  including exceptions. Certain functions required more cases than others:
-  - [new_state]: 
+  function defined within the State interface, as well as verifying the expected
+  behavior for all other modules that can only be tested through play-testing. 
+
+  Black Box Testing: State
+  The [get_], [_of_], and functions are simple and thus did not require 
+  much testing. We tested every path of output for all other functions, 
+  including exceptions. Here is the approach for each function: 
+  - [check_full]:
+  - [switch_colors]:
+  - [make_assoc]:
+  - [check_win]:
+  - [check_val_used]:
+  - [get_valid_int]: this function produces a random value that cannot equal a 
+    value that has already been played, so we asserted that it could be anything
+    EXCEPT for the numbers already played. 
   - [insert]: since this is independent of chip color, we tested using chips of 
     only one color. The correctness of using multiple colors is demonstrated 
     later. We tested using [make_assoc] to verify the coordinates of the 
     inserted chips. We made sure inserting into a full column raises 
     [full_col_err] and inserting into a nonexistent column raises 
     [invalid_col_err]. 
-  - [get_valid_int]: this function produces a random value that cannot equal a 
-    value that has already been played, so testing was done using 
+  - [gravity]: Tested boards with various combinations of floating and grounded 
+    chips, resulting in boards with only grounded chips in the same columns. 
+  - [tick_turn]: Simple function. Verified that one color is changed to the 
+    other between [st] and [st']. 
+  - [undo]: This is essentially a get_previous_state function, so it was tested 
+    here like a getter. Tested more in play testing. 
+  - [new_state]: 
+  - [score]: Verified that horizontal, vertical, diagonal lines individually 
+    counted for scores, then tested overlapping/intersecting lines. Tested that
+    chips on the same line separated by an empty cell or a chip of another color
+    did not add score.
 
   using test cases that worked with every
   permutation of patterns within the board. That is, every combination of 
 
+  Play Testing: Main, Command, AI, State
+  - For every opportunity to input a command, we tested the empty string, 
+    keywords without parameters, keywords with extra parameters, and other 
+    malformed commands. We also checked the expected behavior of all correct 
+    commands. 
+  - "Normal" win condition - player who connects 4 earns 20 points, allowing 
+    them to win with the most points
+  - "Underdog" win condition - the player who doesn't connect 4 pieces but still
+    earns more points overall wins
 
 Subjective Testing
   In addition to testing our system's logical correctness, we had to test it for
@@ -52,7 +77,10 @@ Subjective Testing
   instructions, etc. This testing happened continuously throughout development,
   every time we implemented a new feature. Only until we were satisfied with 
   both Subjective and System testing did we move on to implement other 
-  features.
+  features. 
+
+  - 
+
 
 AI Testing
   During the Subjective Testing phase, we came up with several strategies and 

@@ -135,11 +135,6 @@ let print_win st c =
   ANSITerminal.(print_string [style_of_color c2] (string_of_color c2 ^ "\'s "));
   print_string "score : ";
   ANSITerminal.(print_string [style_of_color c2] (string_of_int s2 ^ "\n"));
-
-  (* ANSITerminal.(print_string [style_of_color c1] (string_of_color c1));
-     print_string (": " ^ (string_of_int s1) ^ " points\n");
-     ANSITerminal.(print_string [style_of_color c2] (string_of_color c2));
-     print_string (": " ^ (string_of_int s2) ^ " points\n"); *)
   print_string "\nGame over! ";
   ANSITerminal.(print_string[style_of_color c] (string_of_color c));
   print_string " wins!";

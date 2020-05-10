@@ -246,7 +246,7 @@ let check_val_used c v st =
 
 let rec get_valid_int c st = 
   let v = Random.int 10 in 
-  print_int v; print_string "\n";
+  (* print_int v; print_string "\n"; *)
   if (check_val_used c v st) then get_valid_int c st 
   else v
 
@@ -465,11 +465,11 @@ let rec update_assoc ass cons pattern (direction: int * int) piece =
     end
   | _ -> failwith "invalid pattern"
 
-let rec print_assoc assoc = 
-  match assoc with 
-  | [] -> print_string"";
-  | h::t -> print_int (fst h); print_string " "; print_int (snd h); print_string "\n";
-    print_assoc t
+(* let rec print_assoc assoc = 
+   match assoc with 
+   | [] -> print_string"";
+   | h::t -> print_int (fst h); print_string " "; print_int (snd h); print_string "\n";
+    print_assoc t *)
 
 let find_diagonals piece assoc n = 
   let p1 = if check_pattern piece assoc n (1,1) then [(1,1)] 
@@ -496,12 +496,6 @@ let rec diagonal_score_helper a board n direction =
       10 + diagonal_score_helper a board n t
     else 
       diagonal_score_helper a board n t
-
-let rec new_ass_helper ass n direction a =
-  match direction with 
-  | [] -> []
-  | h::t -> let new_ass = update_assoc ass n "diagonal" h a in 
-    new_ass_helper new_ass n t a
 
 let score t = 
   let board = t |> rotate 3 |> fun x -> x.board |> map rev in

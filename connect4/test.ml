@@ -26,9 +26,10 @@ System Testing (TODO)
   behavior for all other modules that can only be tested through play-testing. 
 
   Black Box Testing: State
-  The [get_], [_of_], and functions are simple and thus did not require 
+  The [get_] and [_of_] functions are simple and thus did not require 
   much testing. We tested every path of output for all other functions, 
-  including exceptions. Here is the approach for each function: 
+  including exceptions. [print] and [print_win] were play-tested. 
+  Here is the approach for every other function: 
   - [check_full]:
   - [switch_colors]:
   - [make_assoc]:
@@ -54,6 +55,8 @@ System Testing (TODO)
     counted for scores, then tested overlapping/intersecting lines. Tested that
     chips on the same line separated by an empty cell or a chip of another color
     did not add score.
+  - [rotate]: 
+
 
   using test cases that worked with every
   permutation of patterns within the board. That is, every combination of 

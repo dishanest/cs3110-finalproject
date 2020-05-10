@@ -40,6 +40,7 @@ type t = {
 } 
 
 let get_cell_color c = c.color
+
 let get_cell_value c = c.value
 
 let get_p1_color st = 
@@ -76,9 +77,6 @@ let rec list_assoc color lst row col =
   | None::b -> list_assoc color b (row+1) col
   | [] -> []
 
-(** [make_assoc color board col] is an association list from an int r to an int
-    c where r is the row and c is the column of all cells of 
-    color [color] in [t] Requires: col begins at 0*)
 let rec make_assoc color board col = 
   match board with 
   | [] -> []
@@ -546,10 +544,10 @@ let score t =
             diagonal_score new_ass (snd t.dimensions)
       | [] -> 0 in
 
-  (* let v1 =  vertical_score assoc (fst t.dimensions) in 
-     let h1 = horizontal_score assoc (snd t.dimensions) in 
-     let v2 =  vertical_score assoc' (fst t.dimensions) in 
-     let h2 = horizontal_score assoc' (snd t.dimensions) in  *)
+  let v1 =  vertical_score assoc (fst t.dimensions) in 
+  let h1 = horizontal_score assoc (snd t.dimensions) in 
+  let v2 =  vertical_score assoc' (fst t.dimensions) in 
+  let h2 = horizontal_score assoc' (snd t.dimensions) in 
   let d1 = diagonal_score assoc (fst t.dimensions) in 
-  (* (v1+h1, v2+h2) *)
-  (d1,0)
+  let d2 = diagonal_score assoc' (fst t.dimensions) in
+  (v1 + h1 + d1, v2 + h2 + d2)

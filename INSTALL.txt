@@ -1,0 +1,12 @@
+Installation instructions for "Connect Mour" game written in OCaml
+
+We assume that if you are reading this file, then you are evaluating our final 
+project submission, a game called "Connect Mour," and already have the proper 
+resources for compiling and running OCaml code. Then let's begin.
+
+1. Type into the terminal "cd connect4/"
+2. Type into the terminal "make build"
+3. Type into the terminal "make play" to begin the game. 
+
+The instructions for playing the game are included within the game itself. 
+Have fun!

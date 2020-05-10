@@ -11,24 +11,25 @@ exception Empty
 
 exception Malformed
 
+(** [parse_insert cmd_lst] produces either [RInsert] or [Insert] from string 
+    list [cmd_lst]. 
+    - If [cmd_lst] has one int [c], [parse_insert] is [RInsert c].
+    - If [cmd_lst] has two ints [c] and [v], [parse_insert] is [Insert (c, v)]. 
+    - Raise: [Malformed] if [cmd_lst] does not match the above cases. *)
 let parse_insert cmd_lst = 
   match cmd_lst with 
   | c::[] -> RInsert (int_of_string c)
   | c :: v :: [] -> Insert (int_of_string c, int_of_string v) 
   | _ -> raise Malformed
 
+(** [parse_rotate cmd_lst] produces [Rotate] commands from strings in [cmd_lst].
+    - If [cmd_lst] contains an int [n], [parse_rotate] is [Rotate n].
+      Raises: [Malformed] if [cmd_lst] does not match the above cases. *)
 let parse_rotate cmd_lst = 
   match cmd_lst with 
   | num :: [] -> Rotate (int_of_string num)
   | _ -> raise Malformed
 
-(** [parse str] is the command that results from an input string: 
-    - Splits words by ' ' and then filters out "". 
-    - If [str] begins with "insert", it uses the constructor [Insert] of [t]  
-      where [t] is a string list of the words after "insert". 
-    - If [str] is "score", it uses the constructor [Score]. 
-    - If [str] is "quit", it uses the constructor [Quit]. 
-*)
 let parse str =
   match str |> String.trim |> String.split_on_char ' '
         |> List.filter (fun x -> x <> "") with

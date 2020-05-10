@@ -1,0 +1,3 @@
+From hl999's machine, "cloc ." counts 1018 lines of code immediately after 
+"make clean". The numbers seem to differ on the other group members' machines,
+however each group member also reports >1000 LOC immediately after "make clean."

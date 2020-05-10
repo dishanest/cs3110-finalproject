@@ -25,6 +25,22 @@ System Testing (TODO)
   Verifying interface specifications
   Black box play tests for each instance of the REPL - empty string, keyword without parameters, keyword with extra parameters, mispelled keyword, nonsensical command, 
 
+  The correctness of the system is demonstrated by the correctness of every 
+  function defined within the State interface. The [get_], [_of_], and functions are simple and 
+  thus did not require much testing. We tested every path of output for all other functions, 
+  including exceptions. Certain functions required more cases than others:
+  - [new_state]: 
+  - [insert]: since this is independent of chip color, we tested using chips of 
+    only one color. The correctness of using multiple colors is demonstrated 
+    later. We tested using [make_assoc] to verify the coordinates of the 
+    inserted chips. We made sure inserting into a full column raises 
+    [full_col_err] and inserting into a nonexistent column raises 
+    [invalid_col_err]. 
+  - [get_valid_int]: this function produces a random value that cannot equal a 
+    value that has already been played, so testing was done using 
+
+  using test cases that worked with every
+  permutation of patterns within the board. That is, every combination of 
 
 
 Subjective Testing

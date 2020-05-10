@@ -434,7 +434,7 @@ let rec calculate_score piece board n pattern direction =
     if n = 0 then 0 
     else
       let score = score_cell_value (snd piece) (fst piece) board in 
-      print_string "score: "; print_int score; print_string "\n";
+      (* print_string "score: "; print_int score; print_string "\n"; *)
       score + calculate_score (fst piece + fst direction, snd piece + snd direction) board (n-1) pattern direction
   | _ -> failwith "invalid pattern"
 
@@ -472,7 +472,6 @@ let rec print_assoc assoc =
     print_assoc t
 
 let find_diagonals piece assoc n = 
-  (* let res = [] in *)
   let p1 = if check_pattern piece assoc n (1,1) then [(1,1)] 
     else [] in 
   let p2 = if check_pattern piece assoc n (1,-1) then [(1,-1)]
@@ -489,11 +488,9 @@ let rec diagonal_score_helper a board n direction =
   match direction with 
   | [] -> 0
   | h::t -> 
-    let dir = h in 
     let x = calculate_score a board n "diagonal" h in 
-    (* let new_ass = update_assoc ass n "diagonal" direction a in *)
-    print_string "n: "; print_int n; print_string "\n";
-    print_string "x: "; print_int x; print_string "\n";
+    (* print_string "n: "; print_int n; print_string "\n"; *)
+    (* print_string "x: "; print_int x; print_string "\n"; *)
     (* print_string "new assoc: "; print_assoc new_ass; print_string "\n"; *)
     if x = 10 then
       10 + diagonal_score_helper a board n t
@@ -547,24 +544,10 @@ let score t =
           match direction with 
           | [] -> 0;
           | h::t' -> if h = (0,0) then
-              (* if direction = (0,0) then  *)
               diagonal_score ass (n-1)
             else 
               let new_ass = new_ass_helper ass n direction a in
               diagonal_score_helper a board n direction + diagonal_score new_ass (snd t.dimensions)
-              (* else 
-                 let x = calculate_score a board n "diagonal" direction in 
-                 (* let new_ass = update_assoc ass n "diagonal" direction a in *)
-                 print_string "n: "; print_int n; print_string "\n";
-                 print_string "x: "; print_int x; print_string "\n";
-                 (* print_string "new assoc: "; print_assoc new_ass; print_string "\n"; *)
-                 (* print_int x; print_string "\n"; *)
-                 if x = 10 
-                 (* then 10 + diagonal_score new_ass (snd t.dimensions) *)
-                 then 10 + diagonal_score b (snd t.dimensions)
-                 else 
-                  (* diagonal_score new_ass (snd t.dimensions) *)
-                  diagonal_score b (snd t.dimensions) *)
         end
       | [] -> 0 in
 
@@ -577,5 +560,4 @@ let score t =
   print_string "v1 : "; print_int v1; print_string "\n";
   print_string "h1 : "; print_int h1; print_string "\n";
   print_string "d1 : "; print_int d1; print_string "\n";
-  (* (d1, 0) *)
   (v1 + h1 + d1, v2 + h2 + d2)

@@ -27,11 +27,6 @@ ocamlfind ocamlc -c -package oUnit -package ANSITerminal -o command.cmo command.
 ocamlfind ocamldep -package oUnit -package ANSITerminal -modules state.ml > state.ml.depends
 # Target: state.cmo, tags: { package(ANSITerminal), package(oUnit), byte, compile, extension:cmo, extension:ml, file:state.cmo, file:state.ml, implem, ocaml, quiet, traverse }
 ocamlfind ocamlc -c -package oUnit -package ANSITerminal -o state.cmo state.ml
-+ ocamlfind ocamlc -c -package oUnit -package ANSITerminal -o state.cmo state.ml
-File "state.ml", line 492, characters 8-11:
-492 |     let dir = h in 
-              ^^^
-Warning 26: unused variable dir.
 # Target: main.byte, tags: { package(ANSITerminal), package(oUnit), byte, dont_link_with, extension:byte, file:main.byte, link, ocaml, program, quiet, traverse }
 ocamlfind ocamlc -linkpkg -package oUnit -package ANSITerminal command.cmo state.cmo ai.cmo main.cmo -o main.byte
 # Compilation successful.

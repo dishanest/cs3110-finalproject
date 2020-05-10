@@ -123,10 +123,16 @@ let print_win st c =
   print_win st c;
   let c1 = get_p1_color st in
   let c2 = get_p2_color st in
+  let s1 = if c1 = c then 
+      fst (score st) + 20
+    else fst (score st) in 
+  let s2 = if c2 = c then 
+      snd (score st) + 20
+    else snd (score st) in 
   ANSITerminal.(print_string [style_of_color c1] (string_of_color c1));
-  print_string (": " ^ (st |> score |> fst |> string_of_int) ^ " points\n");
+  print_string (": " ^ (string_of_int s1) ^ " points\n");
   ANSITerminal.(print_string [style_of_color c2] (string_of_color c2));
-  print_string (": " ^ (st |> score |> snd |> string_of_int) ^ " points\n");
+  print_string (": " ^ (string_of_int s2) ^ " points\n");
   print_string "\nGame over! ";
   ANSITerminal.(print_string[style_of_color c] (string_of_color c));
   print_string " wins!";

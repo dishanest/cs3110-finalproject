@@ -489,8 +489,8 @@ let rec diagonal_score_helper a board n direction =
   | [] -> 0
   | h::t -> 
     let x = calculate_score a board n "diagonal" h in 
-    print_string "n: "; print_int n; print_string "\n";
-    print_string "x: "; print_int x; print_string "\n";
+    (* print_string "n: "; print_int n; print_string "\n"; *)
+    (* print_string "x: "; print_int x; print_string "\n"; *)
     (* print_string "new assoc: "; print_assoc new_ass; print_string "\n"; *)
     if x = 10 then
       10 + diagonal_score_helper a board n t
@@ -546,8 +546,9 @@ let score t =
           | h::t' -> if h = (0,0) then
               diagonal_score ass (n-1)
             else 
-              let new_ass = new_ass_helper ass n direction a in
-              diagonal_score_helper a board n direction + diagonal_score new_ass (snd t.dimensions)
+              (* let new_ass = new_ass_helper ass n direction a in *)
+              let x = diagonal_score_helper a board n direction in 
+              x + diagonal_score b (snd t.dimensions)
         end
       | [] -> 0 in
 
@@ -557,7 +558,7 @@ let score t =
   let h2 = horizontal_score assoc' (snd t.dimensions) in 
   let d1 = diagonal_score assoc (fst t.dimensions) in 
   let d2 = diagonal_score assoc' (fst t.dimensions) in
-  print_string "v1 : "; print_int v1; print_string "\n";
-  print_string "h1 : "; print_int h1; print_string "\n";
-  print_string "d1 : "; print_int d1; print_string "\n";
+  (* print_string "v1 : "; print_int v1; print_string "\n";
+     print_string "h1 : "; print_int h1; print_string "\n";
+     print_string "d1 : "; print_int d1; print_string "\n"; *)
   (v1 + h1 + d1, v2 + h2 + d2)

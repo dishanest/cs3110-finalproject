@@ -246,7 +246,7 @@ let check_val_used c v st =
 
 let rec get_valid_int c st = 
   let v = Random.int 10 in 
-  print_int v; print_string "\n";
+  (* print_int v; print_string "\n"; *)
   if (check_val_used c v st) then get_valid_int c st 
   else v
 

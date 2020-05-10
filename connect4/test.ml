@@ -24,9 +24,10 @@ System Testing (TODO)
   Black box tests
   Verifying interface specifications
   Black box play tests for each instance of the REPL - empty string, keyword without parameters, keyword with extra parameters, mispelled keyword, nonsensical command, 
+
   The correctness of the system is demonstrated by the correctness of every 
-  function defined within the State interface. The [get_], [_of_], and  functions did not
-  require testing. We tested every path of output for all other functions, 
+  function defined within the State interface. The [get_], [_of_], and functions are simple and 
+  thus did not require much testing. We tested every path of output for all other functions, 
   including exceptions. Certain functions required more cases than others:
   - [new_state]: 
   - [insert]: since this is independent of chip color, we tested using chips of 

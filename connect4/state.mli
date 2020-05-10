@@ -77,7 +77,8 @@ val check_full: t -> bool
 val switch_colors: t -> t
 
 (** [make_assoc c b init_col] is an association list that maps all the cells
-    of color [c] in board [b] beginning at column [init_col]. 
+    of color [c] in board [b] to their coordinates, beginning at column 
+    [init_col]. 
     Requires: [init_col] >= 0. *)
 val make_assoc: color -> board -> int -> (int*int) list
 
@@ -99,8 +100,8 @@ val get_valid_int: color -> t -> int
 (** [insert col v t] inserts a chip with value [v] in column [col] of the board
     in state [t] where color is of the player whose turn it is in [t]
     Precondition: [col] is a valid column and [v] is an in between 0..9
-    Raises: "Invalid col" failure if [col] is less than 1 and "Invalid col" 
-    failure if the column is already full*)
+    Raises: [invalid_col_err] if [col] is less than 1 and [full_col_err] if the 
+    column is already full. *)
 val insert: int -> int -> t -> t
 
 (** [gravity t] Is the state which contains all of the pieces in [t] but whose
@@ -112,7 +113,7 @@ val tick_turn: t -> t
 
 (** [undo t] returns the last state before an alteration such as an insertion 
     or a rotation. 
-    Raises: "Could not undo further" failure if undo is called on a new state*)
+    Raises: [undo_err] failure if undo is called on a new state*)
 val undo: t-> t
 
 (** [new_state (c1, c2) row col] creates a new state with an empty board of size 

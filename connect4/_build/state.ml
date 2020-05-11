@@ -337,14 +337,14 @@ let print_cell styles c =
     "(" ^ (cell |> get_cell_value |> string_of_int) ^ ")" 
     |> ANSITerminal.(print_string (styles @ [style]))
 
-
 let print_col_nums st =
   let cols = snd (st.dimensions) in 
-  let rec loop cols acc= 
+  let rec loop cols acc = 
     if acc > cols -1 then (print_string "";) else
       (print_string (" "^ string_of_int acc ^ " ");
        loop cols (acc+1); )
-  in loop cols 0
+  in loop cols 0;
+  print_endline ""
 
 
 let print st = 

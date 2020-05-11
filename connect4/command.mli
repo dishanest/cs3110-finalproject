@@ -1,5 +1,7 @@
 (** The type [command] represents a player command that is decomposed
     into a verb and possibly an object phrase. *)
+
+(** Representation type for Command.  *)
 type command = 
   | Insert of int * int
   | RInsert of int

@@ -31,10 +31,13 @@ type win =
   | Win of color
 
 (** A cell within the board with color and coordinate information. *)
-type cell
+type cell = {
+  color: color;
+  value: int;
+}
 
 (** An representation of a n x n grid of cells *)
-type board
+type board = cell option list list
 
 (** Abstract data type of values representing states. *)
 type t
@@ -76,9 +79,8 @@ val check_full: t -> bool
     switched to the color of the other player. *)
 val switch_colors: t -> t
 
-(** [make_assoc c b init_col] is an association list that maps all the cells
-    of color [c] in board [b] to their coordinates, beginning at column 
-    [init_col]. 
+(** [make_assoc c b init_col] is a list of the cooardinates of all the cells
+    of color [c] in board [b], beginning at column [init_col]. 
     Requires: [init_col] >= 0. *)
 val make_assoc: color -> board -> int -> (int*int) list
 
@@ -91,7 +93,7 @@ val make_assoc: color -> board -> int -> (int*int) list
 val check_win: t -> int -> win
 
 (** [check_val_used c v st] is true if the player of color [c] has already 
-    inserted a chip of int [v] in state [st]. *)
+    inserted a chip of int [v] in state [st]. If [v = 0] then [false]. *)
 val check_val_used: color -> int -> t -> bool
 
 (** [get_valid_int c st] is a valid int the player of color [c] can insert*)

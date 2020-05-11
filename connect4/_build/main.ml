@@ -120,25 +120,19 @@ let undo_err = "Cannot undo without first making a move."
 
 (** [print_tie st] prints the state [st] and the tie message. *)
 let print_tie st = 
-  print st;
-  print_col_nums st;
   let c1 = get_p1_color st in 
   let c2 = get_p2_color st in
-  print_newline ();
-  ANSITerminal.(print_string[style_of_color (c1)] "GAME");
-  print_newline ();
-  ANSITerminal.(print_string[style_of_color (c2)] "OVER");
-  print_newline ();
+  print_string "\nGame over! ";
   ANSITerminal.(print_string [style_of_color (c1)] (string_of_color c1));
   print_string (" and ");
   ANSITerminal.(print_string [style_of_color (c2)] (string_of_color c2));
-  print_string (" TIE! ");
-  print_newline ();
+  print_string (" TIE! \n");
   exit 0
 
 (** [print_win st c] prints the state [st] and the win message. *)
 let print_win st c = 
-  print_win st c;
+  State.print_win st c;
+  print_col_nums st;
   let c1 = get_p1_color st in
   let c2 = get_p2_color st in
   let s1 = if c1 = c then 
@@ -147,6 +141,7 @@ let print_win st c =
   let s2 = if c2 = c then 
       snd (score st) + 20
     else snd (score st) in 
+  print_endline "";
   ANSITerminal.(print_string [style_of_color c1] (string_of_color c1 ^ "\'s "));
   print_string "score: ";
   ANSITerminal.(print_string [style_of_color c1] (string_of_int s1 ^ "\n"));
@@ -215,7 +210,7 @@ let print_loadup c1 c2 =
     the newest board in [st]. *)
 let rec play (ai1_opt, ai2_opt) st : State.t =
   (* end game and print tie message if board is full. *)
-  if check_full st then (print_tie st; exit 0) else print st;
+  if check_full st then print_tie st else print st;
   print_col_nums st;
   (* check and assign AI on this turn *)
   let current_player = get_current_color st in 
@@ -411,8 +406,7 @@ let intro_repl () =
   start_game (dimensions_repl ()) (c1, c2) (ai1_opt, ai2_opt) random
 
 let main () =
-  (* TODO: uncomment this when finished testing. 
-     print_loadup Red Blue; *)
+  print_loadup Red Blue;
   print_welcome ();
   print_instructions ();
   intro_repl ()
